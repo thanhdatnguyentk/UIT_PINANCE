@@ -7,16 +7,19 @@ from psycopg2 import extras
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Trang chủ: hiển thị chứng khoán
+# Trang chủ: hiển thị trang dashboard nếu đã đăng nhập, ngược lại landing page
 @app.route('/')
 def index():
+    if session.get('user_id'):
+        return redirect(url_for('dashboard'))
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM stocks;")
+    cur.execute("SELECT stock_id, total_shares, outstanding_shares, status, issue_date FROM stocks;")
     stocks = cur.fetchall()
     cur.close()
     conn.close()
     return render_template('index.html', stocks=stocks)
+
 
 # Đăng ký
 @app.route('/register', methods=['GET', 'POST'])
@@ -51,8 +54,7 @@ def register():
             conn = get_conn()
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO users (first_name, last_name, gender, birthday, email, phone, payment_method, password) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
+                "INSERT INTO users (first_name, last_name, gender, birthday, email, phone, payment_method, password) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
                 (first_name, last_name, gender, birthday, email, phone, payment_method, hashed)
             )
             conn.commit()
@@ -73,10 +75,13 @@ def login():
         email = request.form['email'].strip()
         password = request.form['password']
         hashed = hashlib.sha256(password.encode()).hexdigest()
-        
+
         conn = get_conn()
         cur = conn.cursor(cursor_factory=extras.DictCursor)
-        cur.execute("SELECT user_id, first_name FROM users WHERE email = %s AND password = %s;", (email, hashed))
+        cur.execute(
+            "SELECT user_id, first_name FROM users WHERE email = %s AND password = %s;",
+            (email, hashed)
+        )
         user = cur.fetchone()
         cur.close()
         conn.close()
@@ -91,6 +96,48 @@ def login():
             return redirect(url_for('login'))
 
     return render_template('login.html')
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    cur.execute("SELECT first_name, last_name FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    cur.execute("SELECT account_id, account_type, balance FROM accounts WHERE user_id = %s", (session['user_id'],))
+    accounts = cur.fetchall()
+    cur.execute("SELECT COUNT(*) FROM deposits WHERE account_id IN (SELECT account_id FROM accounts WHERE user_id=%s)", (session['user_id'],))
+    total_deposits = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM withdrawals WHERE account_id IN (SELECT account_id FROM accounts WHERE user_id=%s)", (session['user_id'],))
+    total_withdrawals = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return render_template('dashboard.html', user=user, accounts=accounts,
+                           total_deposits=total_deposits, total_withdrawals=total_withdrawals)
+
+
+@app.route('/watchlist')
+def watchlist():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    cur.execute(
+        """
+        SELECT p.portfolios_id, c.ticker_symbol, c.company_name,
+               p.quantity, p.average_price, p.date
+        FROM portfolios p
+        JOIN stocks s ON p.stock_id = s.stock_id
+        JOIN companies c ON s.company_id = c.company_id
+        JOIN accounts a ON p.account_id = a.account_id
+        WHERE a.user_id = %s
+        ORDER BY p.date DESC;
+        """, (session['user_id'],)
+    )
+    portfolios = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('watchlist.html', portfolios=portfolios)
 
 # Đăng xuất
 @app.route('/logout')

@@ -3,16 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(response => response.json())
       .then(data => {
         const ul = document.getElementById('stock-list');
-        ul.innerHTML = '';  // Clear existing
+        ul.innerHTML = '';
         data.forEach(s => {
           const li = document.createElement('li');
-          li.innerHTML = `
-            ${s.company_id} – ${s.company_name}: ${s.description}
-            <form action="/delete" method="post" style="display:inline">
-              <input type="hidden" name="id" value="${s.id}" />
-              <button type="submit">Xóa</button>
-            </form>
-          `;
+          li.textContent = `${s.symbol} – ${s.name}: ${s.price}`;
           ul.appendChild(li);
         });
       })

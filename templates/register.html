@@ -1,49 +1,67 @@
 <!DOCTYPE html>
-  <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Đăng ký</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  </head>
-  <body>
-    <nav>
-      <a href="{{ url_for('index') }}">Trang chủ</a> |
-      <a href="{{ url_for('register') }}">Đăng ký</a>
-    </nav>
-    <h1>Đăng ký tài khoản</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for category, msg in messages %}
-            <li class="{{ category }}">{{ msg }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    <form action="" method="POST" class="form-container">
-      <label>Họ:</label>
-      <input type="text" name="first_name" required />
-      <label>Tên:</label>
-      <input type="text" name="last_name" required />
-      <label>Giới tính:</label>
-      <select name="gender" required>
-        <option value="Nam">Nam</option>
-        <option value="Nữ">Nữ</option>
-        <option value="Khác">Khác</option>
-      </select>
-      <label>Ngày sinh:</label>
-      <input type="date" name="birthday" required max="{{ max_date }}" />
-      <label>Email:</label>
-      <input type="email" name="email" required />
-      <label>Phone:</label>
-      <input type="text" name="phone" required pattern="\d{10}" />
-      <label>Phương thức thanh toán:</label>
-      <input type="text" name="payment_method" required />
-      <label>Password:</label>
-      <input type="password" name="password" required minlength="6" />
-      <label>Confirm Password:</label>
-      <input type="password" name="confirm_password" required minlength="6" />
-      <button type="submit">Đăng ký</button>
-    </form>
-  </body>
-  </html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo"> 
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image" style="max-width: 120px; max-height: 120px;">
+        </div>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('register') }}" class="active" class="btn btn-primary">Register</a>
+        <a href="{{ url_for('login') }}">Login</a>
+      </nav>
+    </div>
+  </header>
+  <main class="landing">
+    <div class="container landing-content" style="align-items: flex-start;">
+      <div class="text-block">
+        <h1>Đăng ký tài khoản</n**>
+        <p>Chào mừng! Hãy điền thông tin bên dưới để bắt đầu.</p>
+      </div>
+      <div class="form-block" style="flex:1; max-width:400px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul class="flashes">
+              {% for category, msg in messages %}
+                <li class="{{ category }}">{{ msg }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+        <form action="" method="POST" class="form-container">
+          <label>Họ:</label>
+          <input type="text" name="first_name" required />
+          <label>Tên:</label>
+          <input type="text" name="last_name" required />
+          <label>Giới tính:</label>
+          <select name="gender" required>
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+            <option value="Khác">Khác</option>
+          </select>
+          <label>Ngày sinh:</label>
+          <input type="date" name="birthday" required max="{{ max_date }}" />
+          <label>Email:</label>
+          <input type="email" name="email" required />
+          <label>Phone:</label>
+          <input type="text" name="phone" required pattern="\d{10}" />
+          <label>Phương thức thanh toán:</label>
+          <input type="text" name="payment_method" required />
+          <label>Password:</label>
+          <input type="password" name="password" required minlength="6" />
+          <label>Confirm Password:</label>
+          <input type="password" name="confirm_password" required minlength="6" />
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Đăng ký</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

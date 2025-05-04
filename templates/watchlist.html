@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watchlist</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">Investrack</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('watchlist') }}" class="active">Watchlist</a>
+      <a href="#">Markets</a>
+      <a href="#">Screener</a>
+      <a href="#">Stream</a>
+      <a href="#">News</a>
+      <a href="#">History</a>
+      <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+    </nav>
+  </aside>
+  <div class="main-content">
+    <header class="topbar">
+      <div class="breadcrumbs">Watchlist</div>
+    </header>
+    <section class="accounts-table">
+      <h2>Danh sách cổ phiếu đang nắm giữ</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mã</th>
+            <th>Công ty</th>
+            <th>Số lượng</th>
+            <th>Giá trung bình</th>
+            <th>Ngày</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in portfolios %}
+          <tr>
+            <td>{{ p.portfolios_id }}</td>
+            <td>{{ p.ticker_symbol }}</td>
+            <td>{{ p.company_name }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ "{:,.2f}".format(p.average_price) }}₫</td>
+            <td>{{ p.date.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+</body>
+</html>

@@ -11,15 +11,15 @@
   <header class="header">
     <div class="container">
       <div class="logo">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image" style="max-width: 120px; max-height: 120px;">  
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image" style="max-width: 120px; max-height: 120px;    ">  
       </div>
       <nav class="nav">
-        <a href="#">Home</a>
+        <a href="#" class="btn btn-primary" >Home</a>
         <a href="#">About</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
-        <a href="{{ url_for('register') }}" class="btn btn-primary">Sign Up</a>
-        <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+        <a href="{{ url_for('register') }}" >Sign Up</a>
+        <a href="{{ url_for('login') }}" >Login</a>
       </nav>
     </div>
   </header>

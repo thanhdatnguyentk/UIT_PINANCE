@@ -1,3 +1,4 @@
+/* Global */
 body {
     margin: 0;
     font-family: 'Arial', sans-serif;
@@ -34,11 +35,14 @@ body {
     border-radius: 2rem;
     text-decoration: none;
     font-weight: 500;
+    cursor: pointer;
   }
   .btn-primary {
     background-color: #ff5c8d;
     color: #ffffff;
   }
+  
+  /* Landing page */
   .landing {
     padding: 4rem 0;
   }
@@ -73,3 +77,451 @@ body {
     max-width: 100%;
     height: auto;
   }
+  
+  /* Forms: register & login */
+  .form-block {
+    flex: 1;
+    max-width: 400px;
+  }
+  .form-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .form-container label {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+  .form-container input,
+  .form-container select {
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  .form-container button {
+    margin-top: 1.5rem;
+    padding: 0.75rem;
+  }
+  
+  /* Flash messages */
+  ul.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+  }
+  ul.flashes li {
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  li.error {
+    background-color: #fdecea;
+    color: #d32f2f;
+  }
+  li.success {
+    background-color: #e7f7e7;
+    color: #388e3c;
+  }
+
+  /* Dashboard table */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .dashboard-table thead th {
+    background-color: #f7f7f7;
+    font-weight: 600;
+  }
+  .dashboard-table tbody tr:hover {
+    background-color: #fafafa;
+  }
+
+  .app { display: flex; height: 100vh; }
+  .sidebar {
+    width: 220px;
+    background: #fff;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  }
+  .sidebar .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+  }
+  .sidebar nav a {
+    display: block;
+    margin: 1rem 0;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+  .sidebar nav a.active {
+    color: #4a4aff;
+  }
+  .main-content {
+    flex: 1;
+    background: #f0f4ff;
+    overflow-y: auto;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .breadcrumbs { color: #666; }
+  .search-bar input {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+  }
+  .stock-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem 2rem 1rem;
+  }
+  .stock-info h2 { margin: 0; font-size: 2rem; }
+  .stock-info p { color: #666; margin: 0.5rem 0 0; }
+  .summary-cards {
+    display: flex;
+    gap: 1rem;
+  }
+  .summary-cards .card {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .summary-cards .card h3 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+  .summary-cards .card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  .chart-section {
+    background: #fff;
+    margin: 1rem 2rem 2rem;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .chart-controls button {
+    margin: 0 0.25rem;
+    padding: 0.4rem 0.75rem;
+    border: none;
+    border-radius: 4px;
+    background: #e0e0e0;
+    cursor: pointer;
+  }
+  .chart-controls button.btn-primary {
+    background: #ff5c8d;
+    color: #fff;
+  }
+  #priceChart { width: 100%; height: 400px; }
+
+  /* Dashboard layout */
+.app {
+  display: flex;
+  height: 100vh;
+  background: #f0f4ff;
+}
+.sidebar {
+  width: 220px;
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+.sidebar .logo {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #4a4aff;
+  margin-bottom: 2rem;
+}
+.sidebar nav a {
+  display: block;
+  margin: 1rem 0;
+  font-size: 1rem;
+  color: #333;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: #e8ecff;
+  color: #4a4aff;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: #666;
+}
+.search-bar input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 1rem;
+  padding: 2rem;
+}
+.summary-cards .card {
+  flex: 1;
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.summary-cards .card h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+.summary-cards .card p {
+  margin: 0.5rem 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.accounts-table {
+  padding: 0 2rem 2rem;
+}
+.accounts-table h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+.accounts-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.accounts-table th,
+.accounts-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+.accounts-table thead {
+  background: #f7f7f7;
+}
+
+/* Dashboard layout */
+.app {
+  display: flex;
+  height: 100vh;
+  background: #f0f4ff;
+}
+.sidebar {
+  width: 220px;
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  position: relative;
+}
+.sidebar .logo {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #4a4aff;
+  margin-bottom: 2rem;
+}
+.sidebar nav a {
+  display: block;
+  margin: 1rem 0;
+  font-size: 1rem;
+  color: #333;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: #e8ecff;
+  color: #4a4aff;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: #666;
+}
+.search-bar input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 1rem;
+  padding: 2rem;
+}
+.summary-cards .card {
+  flex: 1;
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.summary-cards .card h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+.summary-cards .card p {
+  margin: 0.5rem 0 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.accounts-table {
+  padding: 0 2rem 2rem;
+}
+.accounts-table h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+.accounts-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.accounts-table th,
+.accounts-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+.accounts-table thead {
+  background: #f7f7f7;
+}
+
+/* Header improvements */
+.header {
+  background: linear-gradient(90deg, #4a4aff, #8ab4f8);
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.header .logo {
+  color: #fff;
+  font-size: 1.75rem;
+}
+.nav a {
+  color: rgba(255,255,255,0.9);
+  margin-left: 2rem;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  position: relative;
+}
+.nav a:hover, .nav a.active {
+  color: #fff;
+}
+.nav a::after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: 0;
+  background: #fff;
+  transition: width 0.3s;
+  position: absolute;
+  bottom: -0.25rem;
+  left: 0;
+}
+.nav a:hover::after, .nav a.active::after {
+  width: 100%;
+}
+
+/* Logout button styling */
+.btn-logout {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background-color: #d97165;
+  color: #fff !important;
+  padding: 0.5rem 1rem;
+  border: 2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  font-weight: 800;
+  font-size: 1.3rem !important;
+  transition: background 0.2s;
+}
+.btn-logout:hover {
+  background-color: #c0392b;
+}
+/* Tables (Accounts & Watchlist) */
+.accounts-table table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.accounts-table th, .accounts-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #e0e0e0; }
+.accounts-table thead {
+  background: #f7f7f7;
+}
+
+/* Section Header */
+.accounts-table h2 {
+  margin: 1.5rem 2rem 1rem;
+  font-size: 1.25rem;
+  color: #333;
+}
