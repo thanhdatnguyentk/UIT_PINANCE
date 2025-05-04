@@ -1,88 +1,111 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nạp tiền</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nạp tiền</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
     <div class="app">
-  <aside class="sidebar">
-    <div class="logo">Investrack</div>
-    <nav>
-      <a href="{{ url_for('dashboard') }}">Dashboard</a>
-      <a href="{{ url_for('watchlist') }}">Watchlist</a>
-      <a href="#">Markets</a>
-      <a href="#">Screener</a>
-      <a href="#">Stream</a>
-      <a href="#">News</a>
-      <a href="#">History</a>
-    </nav>
-  </aside>
+      <aside class="sidebar">
+        <div class="logo">Investrack</div>
+        <nav>
+          <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('watchlist') }}">Watchlist</a>
+          <a href="#">Markets</a>
+          <a href="#">Screener</a>
+          <a href="#">Stream</a>
+          <a href="#">News</a>
+          <a href="#">History</a>
+        </nav>
+      </aside>
 
-  <div class="main-content">
-    <header class="topbar">
-        <div class="breadcrumbs">Dashboard</div>
-        <div class="topbar-right">
-          <div class="profile-menu">
-            <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()">
-            <div id="profileDropdown" class="dropdown-content">
-              <div class="user-info">
-                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg">
-                <div>
-                  <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
-                  <p class="email">{{ user_email }}</p>
+      <div class="main-content">
+        <header class="topbar">
+          <div class="breadcrumbs">Dashboard</div>
+          <div class="topbar-right">
+            <div class="profile-menu">
+              <img
+                src="{{ url_for('static', filename='images/avatar.png') }}"
+                alt="Avatar"
+                class="avatar"
+                onclick="toggleProfileDropdown()"
+              />
+              <div id="profileDropdown" class="dropdown-content">
+                <div class="user-info">
+                  <img
+                    src="{{ url_for('static', filename='images/avatar.png') }}"
+                    alt="Avatar"
+                    class="avatar-lg"
+                  />
+                  <div>
+                    <p class="name">
+                      {{ user.first_name }} {{ user.last_name }}
+                    </p>
+                    <p class="email">{{ user_email }}</p>
+                  </div>
                 </div>
+                <a href="#">Chuyển đổi tài khoản</a>
+                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                <a href="{{ url_for('logout') }}">Đăng xuất</a>
               </div>
-              <a href="#">Chuyển đổi tài khoản</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-    <section class="form-section">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
+        <section class="form-section">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
           <ul class="flashes">
             {% for category, msg in messages %}
-              <li class="{{ category }}">{{ msg }}</li>
+            <li class="{{ category }}">{{ msg }}</li>
             {% endfor %}
           </ul>
-        {% endif %}
-      {% endwith %}
-      <form method="POST" class="form-container">
-        <label for="account_id">Chọn tài khoản:</label>
-        <select name="account_id" id="account_id" required>
-          {% for acc in accounts %}
-            <option value="{{ acc.account_id }}">{{ acc.account_type }} - {{ "{:,.2f}".format(acc.balance) }}₫</option>
-          {% endfor %}
-        </select>
-        <label for="amount">Số tiền nạp:</label>
-        <input type="number" name="amount" id="amount" step="0.01" min="0.01" required />
-        <button type="submit" class="btn btn-primary">Nạp tiền</button>
-      </form>
-    </section>
-  </div>
-  </div>
-  <script>
-    function toggleProfileDropdown() {
-      document.getElementById('profileDropdown').classList.toggle('show');
-    }
-    window.onclick = function(event) {
-      if (!event.target.matches('.avatar')) {
-        var dropdowns = document.getElementsByClassName('dropdown-content');
-        for (var i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          if (openDropdown.classList.contains('show')) {
-            openDropdown.classList.remove('show');
+          {% endif %} {% endwith %}
+          <form method="POST" class="form-container">
+            <label for="account_id">Chọn tài khoản:</label>
+            <select name="account_id" id="account_id" required>
+              {% for acc in accounts %}
+              <option value="{{ acc.account_id }}">
+                {{ acc.account_type }} - {{ "{:,.2f}".format(acc.balance) }}₫
+              </option>
+              {% endfor %}
+            </select>
+            <label for="amount">Số tiền nạp:</label>
+            <input
+              type="number"
+              name="amount"
+              id="amount"
+              step="0.01"
+              min="0.01"
+              required
+            />
+            <button type="submit" class="btn btn-primary">Nạp tiền</button>
+          </form>
+        </section>
+      </div>
+    </div>
+    <script>
+      function toggleProfileDropdown() {
+        document.getElementById("profileDropdown").classList.toggle("show");
+      }
+      window.onclick = function (event) {
+        if (!event.target.matches(".avatar")) {
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          for (var i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains("show")) {
+              openDropdown.classList.remove("show");
+            }
           }
         }
-      }
-    }
-  </script>
-</body>
+      };
+    </script>
+  </body>
 </html>

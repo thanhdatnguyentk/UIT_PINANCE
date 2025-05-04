@@ -618,3 +618,8 @@ body {
   .sidebar + .main-content .dropdown-content {
     right: 2rem;
   }
+
+  /* Định dạng riêng cho trang Edit Profile */
+.form-section h2 {
+    margin-bottom: 1rem;
+  }

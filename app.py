@@ -217,6 +217,56 @@ def withdraw():
     cur.close()
     conn.close()
     return render_template('withdraw.html', accounts=accounts, user=user, user_email=user_email) 
+# Chỉnh sửa thông tin cá nhân
+@app.route('/profile/edit', methods=['GET', 'POST'])
+def edit_profile():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy thông tin user hiện tại
+    cur.execute("""
+        SELECT first_name, last_name, gender, birthday, email, phone, payment_method
+        FROM users
+        WHERE user_id = %s
+    """, (session['user_id'],))
+    user = cur.fetchone()
+
+    if request.method == 'POST':
+        # Đọc dữ liệu từ form
+        first_name     = request.form['first_name'].strip()
+        last_name      = request.form['last_name'].strip()
+        gender         = request.form['gender']
+        birthday       = request.form['birthday']
+        email          = request.form['email'].strip()
+        phone          = request.form['phone'].strip()
+        payment_method = request.form['payment_method'].strip()
+
+        # Cập nhật vào DB
+        cur.execute("""
+            UPDATE users
+            SET first_name=%s, last_name=%s, gender=%s,
+                birthday=%s, email=%s, phone=%s, payment_method=%s
+            WHERE user_id = %s
+        """, (
+            first_name, last_name, gender,
+            birthday, email, phone, payment_method,
+            session['user_id']
+        ))
+        conn.commit()
+        flash('Cập nhật thông tin thành công!', 'success')
+        cur.close()
+        conn.close()
+        return redirect(url_for('dashboard'))
+
+    cur.close()
+    conn.close()
+    return render_template(
+        'edit_profile.html',
+        user=user,
+        max_date=datetime.date.today().isoformat()
+    )
 # Đăng xuất
 @app.route('/logout')
 def logout():

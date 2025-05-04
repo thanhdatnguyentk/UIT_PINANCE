@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chỉnh sửa thông tin cá nhân</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">Investrack</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('watchlist') }}">Watchlist</a>
+      <a href="#">Markets</a>
+      <a href="#">Screener</a>
+      <a href="#">Stream</a>
+      <a href="#">News</a>
+      <a href="#">History</a>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+        <div class="breadcrumbs">Dashboard</div>
+        <div class="topbar-right">
+          <div class="profile-menu">
+            <img
+              src="{{ url_for('static', filename='images/avatar.png') }}"
+              alt="Avatar"
+              class="avatar"
+              onclick="toggleProfileDropdown()"
+            />
+            <div id="profileDropdown" class="dropdown-content">
+              <div class="user-info">
+                <img
+                  src="{{ url_for('static', filename='images/avatar.png') }}"
+                  alt="Avatar"
+                  class="avatar-lg"
+                />
+                <div>
+                  <p class="name">
+                    {{ user.first_name }} {{ user.last_name }}
+                  </p>
+                  <p class="email">{{ user_email }}</p>
+                </div>
+              </div>
+              <a href="#">Chuyển đổi tài khoản</a>
+              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+    <section class="form-section" style="margin: 2rem;">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for category, msg in messages %}
+              <li class="{{ category }}">{{ msg }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" class="form-container">
+        <label>Họ:</label>
+        <input type="text" name="first_name" value="{{ user.first_name }}" required />
+
+        <label>Tên:</label>
+        <input type="text" name="last_name" value="{{ user.last_name }}" required />
+
+        <label>Giới tính:</label>
+        <select name="gender" required>
+          <option value="Nam"   {% if user.gender=='Nam'   %}selected{% endif %}>Nam</option>
+          <option value="Nữ"    {% if user.gender=='Nữ'    %}selected{% endif %}>Nữ</option>
+          <option value="Khác"  {% if user.gender=='Khác'  %}selected{% endif %}>Khác</option>
+        </select>
+
+        <label>Ngày sinh:</label>
+        <input
+          type="date"
+          name="birthday"
+          value="{{ user.birthday }}"
+          max="{{ max_date }}"
+          required
+        />
+
+        <label>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value="{{ user.email }}"
+          required
+        />
+
+        <label>Số điện thoại:</label>
+        <input
+          type="text"
+          name="phone"
+          value="{{ user.phone }}"
+          pattern="\d{10}"
+          required
+        />
+
+        <label>Phương thức thanh toán:</label>
+        <input
+          type="text"
+          name="payment_method"
+          value="{{ user.payment_method }}"
+          required
+        />
+
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem;">
+          Lưu thay đổi
+        </button>
+      </form>
+    </section>
+  </div>
+</div>
+<script>
+    function toggleProfileDropdown() {
+      document.getElementById("profileDropdown").classList.toggle("show");
+    }
+    window.onclick = function (event) {
+      if (!event.target.matches(".avatar")) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains("show")) {
+            openDropdown.classList.remove("show");
+          }
+        }
+      }
+    };
+  </script>
+</body>
+</html>
