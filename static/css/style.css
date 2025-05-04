@@ -525,3 +525,96 @@ body {
   font-size: 1.25rem;
   color: #333;
 }
+/* Profile Dropdown */
+.profile-menu {
+    position: relative;
+    margin-left: 1rem;
+  }
+  .profile-menu .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: #fff;
+    min-width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+  .dropdown-content.show {
+    display: block;
+  }
+  .dropdown-content a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    font-size: 0.9rem;
+  }
+  .dropdown-content a:hover {
+    background: #f5f5f5;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  .user-info .avatar-lg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+  }
+  .user-info .name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .user-info .email {
+    font-size: 0.8rem;
+    color: #666;
+  }
+  
+  /* Watchlist Table Hover */
+  .accounts-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  /* Table Container Margin */
+  .accounts-table table {
+    margin: 0 2rem 2rem;
+  }
+  
+  /* Profile Dropdown Links Styling */
+  .dropdown-content a {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #333;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .dropdown-content a + a {
+    border-top: 1px solid #eee;
+  }
+  .dropdown-content a:hover {
+    background: #f5f5f5;
+  }
+  
+  /* Optional icon in dropdown link */
+  .dropdown-content a .icon {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
+  /* Ensure dropdown width on Watchlist */
+  .sidebar + .main-content .dropdown-content {
+    right: 2rem;
+  }

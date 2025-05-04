@@ -96,6 +96,7 @@ def login():
             return redirect(url_for('login'))
 
     return render_template('login.html')
+# Dashboard
 @app.route('/dashboard')
 def dashboard():
     if not session.get('user_id'):
@@ -115,13 +116,19 @@ def dashboard():
     return render_template('dashboard.html', user=user, accounts=accounts,
                            total_deposits=total_deposits, total_withdrawals=total_withdrawals)
 
-
+# Watchlist: xem danh mục cổ phiếu
 @app.route('/watchlist')
 def watchlist():
     if not session.get('user_id'):
+        flash('Vui lòng đăng nhập để xem Watchlist.', 'error')
         return redirect(url_for('login'))
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy thông tin user để dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    # Lấy danh sách portfolios
     cur.execute(
         """
         SELECT p.portfolios_id, c.ticker_symbol, c.company_name,
@@ -137,8 +144,79 @@ def watchlist():
     portfolios = cur.fetchall()
     cur.close()
     conn.close()
-    return render_template('watchlist.html', portfolios=portfolios)
+    return render_template('watchlist.html', portfolios=portfolios, user=user, user_email=user_email)
 
+# Nạp tiền
+@app.route('/deposit', methods=['GET', 'POST'])
+def deposit():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy thông tin user cho dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    # Lấy danh sách tài khoản của user
+    cur.execute("SELECT account_id, account_type, balance FROM accounts WHERE user_id = %s", (session['user_id'],))
+    accounts = cur.fetchall()
+    if request.method == 'POST':
+        account_id = request.form['account_id']
+        amount = request.form['amount']
+        cur.execute(
+            "INSERT INTO deposits (account_id, amount) VALUES (%s, %s);",
+            (account_id, amount)
+        )
+        conn.commit()
+        # Cập nhật balance
+        cur.execute(
+            "UPDATE accounts SET balance = balance + %s WHERE account_id = %s;",
+            (amount, account_id)
+        )
+        conn.commit()
+        flash('Nạp tiền thành công!', 'success')
+        return redirect(url_for('deposit'))
+    cur.close()
+    conn.close()
+    return render_template('deposit.html', accounts=accounts, user=user, user_email=user_email)
+
+# Rút tiền
+@app.route('/withdraw', methods=['GET', 'POST'])
+def withdraw():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy thông tin user cho dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    cur.execute("SELECT account_id, account_type, balance FROM accounts WHERE user_id = %s", (session['user_id'],))
+    accounts = cur.fetchall()
+    if request.method == 'POST':
+        account_id = request.form['account_id']
+        amount = float(request.form['amount'])
+        # Kiểm tra số dư
+        cur.execute("SELECT balance FROM accounts WHERE account_id = %s", (account_id,))
+        balance = cur.fetchone()['balance']
+        if amount > balance:
+            flash('Số tiền rút vượt quá số dư!', 'error')
+        else:
+            cur.execute(
+                "INSERT INTO withdrawals (account_id, amount) VALUES (%s, %s);",
+                (account_id, amount)
+            )
+            conn.commit()
+            cur.execute(
+                "UPDATE accounts SET balance = balance - %s WHERE account_id = %s;",
+                (amount, account_id)
+            )
+            conn.commit()
+            flash('Rút tiền thành công!', 'success')
+        return redirect(url_for('withdraw'))
+    cur.close()
+    conn.close()
+    return render_template('withdraw.html', accounts=accounts, user=user, user_email=user_email) 
 # Đăng xuất
 @app.route('/logout')
 def logout():

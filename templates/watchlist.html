@@ -18,12 +18,28 @@
       <a href="#">Stream</a>
       <a href="#">News</a>
       <a href="#">History</a>
-      <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
     </nav>
   </aside>
   <div class="main-content">
     <header class="topbar">
       <div class="breadcrumbs">Watchlist</div>
+      <div class="topbar-right">
+        <div class="profile-menu">
+          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()">
+          <div id="profileDropdown" class="dropdown-content">
+            <div class="user-info">
+              <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg">
+              <div>
+                <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                <p class="email">{{ user_email }}</p>
+              </div>
+            </div>
+            <a href="#">Chuyển đổi tài khoản</a>
+            <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+            <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+          </div>
+        </div>
     </header>
     <section class="accounts-table">
       <h2>Danh sách cổ phiếu đang nắm giữ</h2>
@@ -54,5 +70,21 @@
     </section>
   </div>
 </div>
+<script>
+    function toggleProfileDropdown() {
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.avatar')) {
+        var dropdowns = document.getElementsByClassName('dropdown-content');
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+  </script>
 </body>
 </html>
