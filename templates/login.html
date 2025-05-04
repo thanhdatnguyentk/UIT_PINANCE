@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Đăng nhập</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('login') }}">Đăng nhập</a> |
+    <a href="{{ url_for('register') }}">Đăng ký</a>
+  </nav>
+  <h1>Đăng nhập</h1>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for category, msg in messages %}
+          <li class="{{ category }}">{{ msg }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <form method="POST" class="form-container">
+    <label>Email:</label>
+    <input type="email" name="email" required />
+    <label>Password:</label>
+    <input type="password" name="password" required minlength="6" />
+    <button type="submit">Đăng nhập</button>
+  </form>
+</body>
+</html>

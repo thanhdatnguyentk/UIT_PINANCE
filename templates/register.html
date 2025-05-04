@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+  <html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Đăng ký</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <nav>
+      <a href="{{ url_for('index') }}">Trang chủ</a> |
+      <a href="{{ url_for('register') }}">Đăng ký</a>
+    </nav>
+    <h1>Đăng ký tài khoản</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, msg in messages %}
+            <li class="{{ category }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <form action="" method="POST" class="form-container">
+      <label>Họ:</label>
+      <input type="text" name="first_name" required />
+      <label>Tên:</label>
+      <input type="text" name="last_name" required />
+      <label>Giới tính:</label>
+      <select name="gender" required>
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+        <option value="Khác">Khác</option>
+      </select>
+      <label>Ngày sinh:</label>
+      <input type="date" name="birthday" required max="{{ max_date }}" />
+      <label>Email:</label>
+      <input type="email" name="email" required />
+      <label>Phone:</label>
+      <input type="text" name="phone" required pattern="\d{10}" />
+      <label>Phương thức thanh toán:</label>
+      <input type="text" name="payment_method" required />
+      <label>Password:</label>
+      <input type="password" name="password" required minlength="6" />
+      <label>Confirm Password:</label>
+      <input type="password" name="confirm_password" required minlength="6" />
+      <button type="submit">Đăng ký</button>
+    </form>
+  </body>
+  </html>
