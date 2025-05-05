@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lệnh đang chờ khớp</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+          <div class="logo">UIT Pinance</div>
+          <nav>
+            <a href="{{ url_for('dashboard') }}" >Dashboard</a>
+            <a href="{{ url_for('watchlist') }}">Watchlist</a>
+            <a href="{{ url_for('markets')}}">Markets</a>
+            <a href="{{ url_for('pending_orders')}}" class="active">Orders</a>     
+
+            <a href="#">News</a>
+       
+          </nav>
+        </aside>
+
+  <div class="main-content">
+     <header class="topbar">
+        <div class="breadcrumbs">Dashboard</div>
+        <div class="topbar-right">
+          <div class="profile-menu">
+            <img
+              src="{{ url_for('static', filename='images/avatar.png') }}"
+              alt="Avatar"
+              class="avatar"
+              onclick="toggleProfileDropdown()"
+            />
+            <div id="profileDropdown" class="dropdown-content">
+              <div class="user-info">
+                <img
+                  src="{{ url_for('static', filename='images/avatar.png') }}"
+                  alt="Avatar"
+                  class="avatar-lg"
+                />
+                <div>
+                  <p class="name">
+                    {{ user.first_name }} {{ user.last_name }}
+                  </p>
+                  <p class="email">{{ user_email }}</p>
+                </div>
+              </div>
+    
+              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+    <section class="accounts-table">
+      <h2>Sổ lệnh</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Mã lệnh</th>
+            <th>Cổ phiếu</th>
+            <th>Loại</th>
+            <th>Số lượng</th>
+            <th>Giá</th>
+            <th>Thời gian đặt</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td>{{ o.order_id }}</td>
+            <td>{{ o.ticker_symbol }}</td>
+            <td>{{ o.order_type }}</td>
+            <td>{{ o.quantity }}</td>
+            <td>{{ "{:,.2f}".format(o.price) }}$</td>
+            <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ o.status }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    function toggleProfileDropdown() {
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.avatar')) {
+        document.querySelectorAll('.dropdown-content.show').forEach(el=>el.classList.remove('show'));
+      }
+    };
+  </script>
+</body>
+</html>

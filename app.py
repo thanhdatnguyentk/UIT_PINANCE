@@ -3,6 +3,7 @@ import hashlib
 import datetime
 from db import get_conn
 from psycopg2 import extras
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -132,7 +133,7 @@ def watchlist():
     cur.execute(
         """
         SELECT p.portfolios_id, c.ticker_symbol, c.company_name,
-               p.quantity, p.average_price, p.date
+               p.quantity, p.date
         FROM portfolios p
         JOIN stocks s ON p.stock_id = s.stock_id
         JOIN companies c ON s.company_id = c.company_id
@@ -142,6 +143,8 @@ def watchlist():
         """, (session['user_id'],)
     )
     portfolios = cur.fetchall()
+    
+
     cur.close()
     conn.close()
     return render_template('watchlist.html', portfolios=portfolios, user=user, user_email=user_email)
@@ -273,6 +276,227 @@ def logout():
     session.clear()
     flash('Bạn đã đăng xuất.', 'success')
     return redirect(url_for('login'))
+
+@app.route('/markets')
+def markets():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy thông tin user cho profile dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    # Lấy dữ liệu thị trường
+    cur.execute(
+        """
+        SELECT s.stock_id, c.ticker_symbol, r.current_price, r.volume
+        FROM stocks s
+        JOIN real_time_price r ON s.stock_id = r.stock_id
+        JOIN companies c ON s.company_id = c.company_id
+        WHERE r.timestamp = (
+            SELECT MAX(timestamp) FROM real_time_price WHERE stock_id = s.stock_id
+        )
+        """
+    )
+    market_data = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_template('markets.html', user=user, user_email=user_email, market_data=market_data)
+
+@app.route('/stocks/<int:stock_id>')
+def stock_detail(stock_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Thông tin cơ bản
+    cur.execute(
+        """
+        SELECT c.company_name, c.ticker_symbol, s.total_shares, s.outstanding_shares, s.status
+        FROM stocks s
+        JOIN companies c ON s.company_id = c.company_id
+        WHERE s.stock_id = %s;
+        """, (stock_id,)
+    )
+    stock = cur.fetchone()
+    # Lấy giá mới nhất
+    cur.execute(
+        "SELECT current_price, bid_price, ask_price, volume, timestamp"
+        " FROM real_time_price"
+        " WHERE stock_id = %s"
+        " ORDER BY timestamp DESC LIMIT 10;",
+        (stock_id,)
+    )
+    latest = cur.fetchone()
+    # Dữ liệu 1 tháng
+    cur.execute(
+        "SELECT timestamp, current_price"
+        " FROM real_time_price"
+        " WHERE stock_id = %s"
+        " ORDER BY timestamp DESC LIMIT 30;",
+        (stock_id,)
+    )
+    series = cur.fetchall()
+    # User for dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    cur.close()
+    conn.close()
+    return render_template(
+        'stock_detail.html', stock=stock, latest=latest,
+        series=series, user=user, user_email=user_email
+    )
+
+# Order Entry & Place Order route
+@app.route('/stocks/<int:stock_id>/order', methods=['GET','POST'])
+def order_entry(stock_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Thông tin cơ bản
+    cur.execute(
+        """
+        SELECT c.company_name, c.ticker_symbol, s.total_shares, s.outstanding_shares, s.status
+        FROM stocks s
+        JOIN companies c ON s.company_id = c.company_id
+        WHERE s.stock_id = %s;
+        """, (stock_id,)
+    )
+    stock = cur.fetchone()
+    # Lấy giá mới nhất
+    cur.execute(
+        "SELECT current_price, bid_price, ask_price, volume, timestamp"
+        " FROM real_time_price"
+        " WHERE stock_id = %s"
+        " ORDER BY timestamp DESC LIMIT 10;",
+        (stock_id,)
+    )
+    latest = cur.fetchone()
+    # Dữ liệu 1 tháng
+    cur.execute(
+        "SELECT timestamp, current_price"
+        " FROM real_time_price"
+        " WHERE stock_id = %s"
+        " ORDER BY timestamp DESC LIMIT 30;",
+        (stock_id,)
+    )
+    series = cur.fetchall()
+    # Lấy thông tin user cho dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id=%s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    # Lấy danh sách tài khoản của user để chọn khi đặt lệnh
+    cur.execute(
+        "SELECT account_id, account_type, balance FROM accounts WHERE user_id = %s", (session['user_id'],)
+    )
+    accounts = cur.fetchall()
+    # Lấy account_id đầu tiên để sử dụng
+    account_id = accounts[0]['account_id'] if accounts else None
+    # Lấy thông tin stock
+    cur.execute(
+        "SELECT s.stock_id, c.ticker_symbol, s.status FROM stocks s JOIN companies c ON s.company_id=c.company_id WHERE s.stock_id=%s",
+        (stock_id,)
+    )
+    stock = cur.fetchone()
+    if request.method == 'POST':
+        price = float(request.form['price'])
+        size = float(request.form['size'])
+        order_type = request.form['order_type']
+        leverage = int(request.form['leverage'])
+        side = request.form['side']
+        tp = request.form.get('take_profit') or None
+        sl = request.form.get('stop_loss') or None
+        # Insert order sử dụng account_id đúng
+        cur.execute(
+            "INSERT INTO orders (account_id, stock_id, order_type, quantity, price, status)"
+            " VALUES (%s, %s, %s, %s, %s, 'Pending') RETURNING order_id;",
+            (account_id, stock_id, side.upper(), size, price)
+        )
+        order_id = cur.fetchone()[0]
+        conn.commit()
+        flash(f'Order {order_id} placed successfully!', 'success')
+        cur.close()
+        conn.close()
+        return redirect(url_for('stock_detail', stock_id=stock_id))
+    # GET: render order entry page
+    cur.close()
+    conn.close()
+    return render_template('order_entry.html', user=user, user_email=user_email, stock=stock, accounts=accounts, latest=latest,
+        series=series)
+
+
+@app.route('/transactions')
+def transactions():
+    # Chuyển hướng nếu chưa login
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+
+    # Truy vấn lịch sử giao dịch, join transactions → orders → stocks → companies
+    cur.execute("""
+        SELECT
+          t.transaction_id,
+          c.ticker_symbol,
+          o.order_type,
+          o.quantity,
+          o.price,
+          t.executed_at
+        FROM transactions t
+        JOIN orders o      ON t.order_id   = o.order_id
+        JOIN stocks s      ON o.stock_id    = s.stock_id
+        JOIN companies c   ON s.company_id  = c.company_id
+        WHERE o.account_id IN (
+          SELECT account_id FROM accounts WHERE user_id = %s
+        )
+        ORDER BY t.executed_at DESC;
+    """, (session['user_id'],))
+
+    transactions = cur.fetchall()
+
+    # Lấy thông tin user cho dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id=%s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    cur.close()
+    conn.close()
+
+    return render_template('transactions.html',user=user, user_email=user_email,  transactions=transactions)
+
+# Orderss page
+@app.route('/pending_orders')
+def pending_orders():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Lấy các lệnh có status Pending cho user
+    cur.execute(
+        """
+        SELECT o.order_id, c.ticker_symbol, o.order_type, o.quantity, o.price, o.created_at, o.status
+        FROM orders o
+        JOIN stocks s ON o.stock_id = s.stock_id
+        JOIN companies c ON s.company_id = c.company_id
+        WHERE o.account_id IN (
+            SELECT account_id FROM accounts WHERE user_id = %s
+        )
+        ORDER BY o.created_at DESC;
+        """, (session['user_id'],)
+    )
+    orders = cur.fetchall()
+
+    # Lấy thông tin user cho dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id=%s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+
+    cur.close()
+    conn.close()
+    return render_template('pending_orders.html', orders=orders, user=user, user_email=user_email)
 
 if __name__ == '__main__':
     app.run(debug=True)

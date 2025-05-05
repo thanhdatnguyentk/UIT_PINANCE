@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lịch sử giao dịch</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="logo">UIT Pinance</div>
+        <nav>
+          <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+          <a href="{{ url_for('watchlist') }}">Watchlist</a>
+          <a href="{{ url_for('markets')}}">Markets</a>
+                <a href="{{ url_for('pending_orders')}}">Orders</a>     
+      
+          <a href="#">News</a>
+     
+        </nav>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="breadcrumbs">Dashboard</div>
+          <div class="topbar-right">
+            <div class="profile-menu">
+              <img
+                src="{{ url_for('static', filename='images/avatar.png') }}"
+                alt="Avatar"
+                class="avatar"
+                onclick="toggleProfileDropdown()"
+              />
+              <div id="profileDropdown" class="dropdown-content">
+                <div class="user-info">
+                  <img
+                    src="{{ url_for('static', filename='images/avatar.png') }}"
+                    alt="Avatar"
+                    class="avatar-lg"
+                  />
+                  <div>
+                    <p class="name">
+                      {{ user.first_name }} {{ user.last_name }}
+                    </p>
+                    <p class="email">{{ user_email }}</p>
+                  </div>
+                </div>
+      
+                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="accounts-table">
+          <h2>Lịch sử giao dịch</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID giao dịch</th>
+                <th>Mã</th>
+                <th>Loại</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Thời gian</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in transactions %}
+              <tr>
+                <td>{{ tx.transaction_id }}</td>
+                <td>
+                  <a href="{{ url_for('stock_detail', stock_id=tx.stock_id) }}"
+                    >{{ tx.ticker_symbol }}</a
+                  >
+                </td>
+                <td>{{ tx.order_type }}</td>
+                <td>{{ tx.quantity }}</td>
+                <td>{{ "{:,.2f}".format(tx.price) }}$</td>
+                <td>{{ tx.executed_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+      function toggleProfileDropdown() {
+        document.getElementById("profileDropdown").classList.toggle("show");
+      }
+    </script>
+  </body>
+</html>

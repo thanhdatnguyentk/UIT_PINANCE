@@ -9,15 +9,15 @@
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="logo">Investrack</div>
+    <div class="logo">UIT Pinance</div>
     <nav>
       <a href="{{ url_for('dashboard') }}">Dashboard</a>
       <a href="{{ url_for('watchlist') }}">Watchlist</a>
       <a href="#">Markets</a>
-      <a href="#">Screener</a>
-      <a href="#">Stream</a>
+      <a href="{{ url_for('pending_orders')}}">Orders</a>     
+  
       <a href="#">News</a>
-      <a href="#">History</a>
+ 
     </nav>
   </aside>
 
@@ -46,8 +46,9 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-              <a href="#">Chuyển đổi tài khoản</a>
+    
               <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
               <a href="{{ url_for('deposit') }}">Nạp tiền</a>
               <a href="{{ url_for('withdraw') }}">Rút tiền</a>
               <a href="{{ url_for('logout') }}">Đăng xuất</a>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ stock.ticker_symbol }} — {{ stock.company_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+          <div class="logo">UIT Pinance</div>
+          <nav>
+            <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+            <a href="{{ url_for('watchlist') }}">Watchlist</a>
+            <a href="{{ url_for('markets')}}">Markets</a>
+                  <a href="{{ url_for('pending_orders')}}">Orders</a>     
+        
+            <a href="#">News</a>
+       
+          </nav>
+        </aside>
+
+  <div class="main-content" style="display:flex;">
+    <!-- Chart & Summary Area -->
+    <div style="flex:2;">
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <a href="{{ url_for('markets') }}">Markets</a> / {{ stock.ticker_symbol }}
+        </div>
+        <div class="topbar-right">
+          <div class="profile-menu">
+            <img src="{{ url_for('static', filename='images/avatar.png') }}" class="avatar" onclick="toggleProfileDropdown()" />
+            <div id="profileDropdown" class="dropdown-content">
+              <div class="user-info">
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" class="avatar-lg" />
+                <div>
+                  <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="email">{{ user_email }}</p>
+                </div>
+              </div>
+    
+                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="summary-cards">
+        <div class="card">
+          <h3>Current Price</h3>
+          <p>{{ "{:,.2f}".format(latest.current_price) }}$</p>
+        </div>
+        <div class="card">
+          <h3>Bid</h3>
+          <p>{{ "{:,.2f}".format(latest.bid_price) }}$</p>
+        </div>
+        <div class="card">
+          <h3>Ask</h3>
+          <p>{{ "{:,.2f}".format(latest.ask_price) }}$</p>
+        </div>
+        <div class="card">
+          <h3>Volume</h3>
+          <p>{{ latest.volume }}</p>
+        </div>
+      </section>
+
+      <section class="chart-section">
+        <canvas id="priceChart"></canvas>
+      </section>
+    </div>
+
+    </div>
+  <script>
+    const labels = JSON.parse('{{ series | map(attribute="timestamp") | list | tojson | safe }}');
+    const data = JSON.parse('{{ series | map(attribute="current_price") | list | tojson | safe }}');
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    new Chart(ctx, { type: 'line', data: { labels, datasets: [{ label: '24h Price', data, fill: true, tension: 0.1 }] } });
+
+    function toggleProfileDropdown() {
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.avatar')) {
+        document.querySelectorAll('.dropdown-content.show').forEach(c => c.classList.remove('show'));
+      }
+    };
+     // Order Entry Panel Logic
+     document.querySelectorAll('.btn-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.modern-tabs .tab').forEach((tab, idx) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.modern-tabs .tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // Optionally show/hide different form sections here
+        // e.g., switch between limit, market, trailing stop fields
+      });
+    });
+
+    // Last Price Button
+    document.querySelector('.btn-small').addEventListener('click', () => {
+      const priceInput = document.querySelector('.order-form input[type="number"]');
+      priceInput.value = latest.current_price.toFixed(2);
+    });
+
+    // TP/SL toggle
+    const tpCheckbox = document.querySelector('.tp-sl input[type="checkbox"]');
+    tpCheckbox.addEventListener('change', () => {
+      document.querySelector('.dual-inputs').style.display = tpCheckbox.checked ? 'flex' : 'none';
+    });
+    // Initialize hidden
+    document.querySelector('.dual-inputs').style.display = 'none';
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markets</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <div class="app">
+
+  <aside class="sidebar">
+    <div class="logo">UIT Pinance</div>
+    <nav>
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('watchlist') }}">Watchlist</a>
+      <a href="{{ url_for('markets') }}" class="active">Markets</a>
+            <a href="{{ url_for('pending_orders')}}">Orders</a>     
+  
+      <a href="#">News</a>
+ 
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="breadcrumbs">Markets</div>
+      <div class="topbar-right">
+        <div class="profile-menu">
+          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()" />
+          <div id="profileDropdown" class="dropdown-content">
+            <div class="user-info">
+              <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg" />
+              <div>
+                <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                <p class="email">{{ user_email }}</p>
+              </div>
+            </div>
+  
+                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary-cards">
+      <div class="card">
+        <h3>Total Stocks</h3>
+        <p>{{ market_data|length }}</p>
+      </div>
+      <div class="card">
+        <h3>Highest Volume</h3>
+        <p>{{ market_data|map(attribute='volume')|max }}</p>
+      </div>
+      <div class="card">
+        <h3>Average Price</h3>
+        <p>{{ "{:,.2f}".format(market_data|map(attribute='current_price')|sum / (market_data|length)) }}$</p>
+      </div>
+    </section>
+
+    <section class="accounts-table">
+      <h2>Market Overview</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Price</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in market_data %}
+          <tr>
+            <td><a href="{{ url_for('order_entry', stock_id=row.stock_id) }}" style="color: #007bff; text-decoration: none;">{{ row.ticker_symbol }}</a></td>
+            <td>{{ "{:,.2f}".format(row.current_price) }}$</td>
+            <td>{{ row.volume }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+  </div>
+  <script>
+    function toggleProfileDropdown() {
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.avatar')) {
+        var dropdowns = document.getElementsByClassName('dropdown-content');
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
