@@ -54,18 +54,44 @@
             </header>
 
             <div>
+                <section class ="summary-cards">
+                    <div class="card">
+                        <h3>Company name</h3>
+                        <p>{{ company.company_name }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Ticker Symbol</h3>
+                        <p>{{ company.ticker_symbol }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Industry</h3>
+                        <p >{{ company.industry }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Listed date</h3>
+                        <p >{{ company.listed_date }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Head quarters</h3>
+                        <p >{{ company.head_quarters }}</p>
+                    </div>
+                    <div class="card">
+                        <h3>Website</h3>
+                        <p >{{ company.website }}</p>
+                    </div>
+                </section>
                 <section class="summary-cards">
                     <div class="card">
                         <h3>Current Price</h3>
-                        <p>{{ "{:,.2f}".format(latest.current_price) }}$</p>
+                        <p>{{ "{:,.0f}".format(latest.current_price) }}$</p>
                     </div>
                     <div class="card">
                         <h3>Bid</h3>
-                        <p>{{ "{:,.2f}".format(latest.bid_price) }}$</p>
+                        <p>{{ "{:,.0f}".format(latest.bid_price) }}$</p>
                     </div>
                     <div class="card">
                         <h3>Ask</h3>
-                        <p>{{ "{:,.2f}".format(latest.ask_price) }}$</p>
+                        <p>{{ "{:,.0f}".format(latest.ask_price) }}$</p>
                     </div>
                     <div class="card">
                         <h3>Volume</h3>

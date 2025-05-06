@@ -171,11 +171,7 @@ def deposit():
             (account_id, amount)
         )
         conn.commit()
-        # Cập nhật balance
-        cur.execute(
-            "UPDATE accounts SET balance = balance + %s WHERE account_id = %s;",
-            (amount, account_id)
-        )
+
         conn.commit()
         flash('Nạp tiền thành công!', 'success')
         return redirect(url_for('deposit'))
@@ -209,11 +205,7 @@ def withdraw():
                 "INSERT INTO withdrawals (account_id, amount) VALUES (%s, %s);",
                 (account_id, amount)
             )
-            conn.commit()
-            cur.execute(
-                "UPDATE accounts SET balance = balance - %s WHERE account_id = %s;",
-                (amount, account_id)
-            )
+        
             conn.commit()
             flash('Rút tiền thành công!', 'success')
         return redirect(url_for('withdraw'))
@@ -366,6 +358,16 @@ def order_entry(stock_id):
         """, (stock_id,)
     )
     stock = cur.fetchone()
+    # Thông tin công ty
+    cur.execute(
+        """
+        SELECT c.company_name, c.ticker_symbol, c.description, c.industry, c.listed_date, c.head_quarters, c.website
+        FROM stocks s
+        JOIN companies c ON s.company_id = c.company_id
+        WHERE s.stock_id = %s;
+        """, (stock_id,)
+    )
+    company = cur.fetchone()
     # Lấy giá mới nhất
     cur.execute(
         "SELECT current_price, bid_price, ask_price, volume, timestamp"
@@ -420,12 +422,12 @@ def order_entry(stock_id):
         flash(f'Order {order_id} placed successfully!', 'success')
         cur.close()
         conn.close()
-        return redirect(url_for('stock_detail', stock_id=stock_id))
+        return redirect(url_for('order_entry', stock_id=stock_id))
     # GET: render order entry page
     cur.close()
     conn.close()
     return render_template('order_entry.html', user=user, user_email=user_email, stock=stock, accounts=accounts, latest=latest,
-        series=series)
+        series=series, company=company)
 
 
 @app.route('/transactions')

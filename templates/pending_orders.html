@@ -23,7 +23,7 @@
 
   <div class="main-content">
      <header class="topbar">
-        <div class="breadcrumbs">Dashboard</div>
+        <div class="breadcrumbs">Orders</div>
         <div class="topbar-right">
           <div class="profile-menu">
             <img
@@ -78,7 +78,7 @@
             <td>{{ o.ticker_symbol }}</td>
             <td>{{ o.order_type }}</td>
             <td>{{ o.quantity }}</td>
-            <td>{{ "{:,.2f}".format(o.price) }}$</td>
+            <td>{{ "{:,.0f}".format(o.price) }}$</td>
             <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
             <td>{{ o.status }}</td>
           </tr>

@@ -1,0 +1,143 @@
+@startuml
+' Định nghĩa entities
+entity "users" as users {
+  * user_id : SERIAL <<PK>>
+  --
+    first_name : VARCHAR(100)
+    last_name  : VARCHAR(100)
+    gender     : VARCHAR(5)
+    birthday   : DATE
+    email      : VARCHAR(150)
+    phone      : VARCHAR(10)
+    payment_method : VARCHAR(50)
+    password   : VARCHAR(256)
+}
+
+entity "accounts" as accounts {
+  * account_id   : SERIAL <<PK>>
+  --
+  * user_id      : INT <<FK>>
+    account_type : VARCHAR(50)
+    balance      : NUMERIC(15,2)
+}
+
+entity "deposits" as deposits {
+  * deposit_id   : SERIAL <<PK>>
+  --
+  * account_id   : INT <<FK>>
+    amount       : NUMERIC(15,2)
+    deposit_time : TIMESTAMP
+}
+
+entity "withdrawals" as withdrawals {
+  * withdrawal_id   : SERIAL <<PK>>
+  --
+  * account_id      : INT <<FK>>
+    amount          : NUMERIC(15,2)
+    withdrawal_time : TIMESTAMP
+}
+
+entity "companies" as companies {
+  * company_id     : SERIAL <<PK>>
+  --
+    company_name   : VARCHAR(100)
+    description    : VARCHAR(500)
+    ticker_symbol  : VARCHAR(50)
+    industry       : VARCHAR(50)
+    listed_date    : TIMESTAMP
+    head_quarters  : VARCHAR(255)
+    website        : VARCHAR(255)
+}
+
+entity "companies_archive" as companies_archive {
+  * archive_id     : SERIAL <<PK>>
+  --
+    company_id     : INT
+    company_name   : VARCHAR(100)
+    description    : VARCHAR(500)
+    ticker_symbol  : VARCHAR(50)
+    industry       : VARCHAR(50)
+    listed_date    : TIMESTAMP
+    head_quarters  : VARCHAR(255)
+    website        : VARCHAR(255)
+    deleted_at     : TIMESTAMP
+}
+
+entity "stocks" as stocks {
+  * stock_id          : SERIAL <<PK>>
+  --
+  * company_id        : INT <<FK>>
+    total_shares      : BIGINT
+    outstanding_shares: BIGINT
+    status            : VARCHAR(20)
+    issue_date        : TIMESTAMP
+}
+
+entity "stock_update_logs" as stock_update_logs {
+  * log_id        : SERIAL <<PK>>
+  --
+    stock_id      : INT
+    field_changed : TEXT
+    old_value     : TEXT
+    new_value     : TEXT
+    updated_at    : TIMESTAMP
+}
+
+entity "portfolios" as portfolios {
+  * portfolios_id : SERIAL <<PK>>
+  --
+    stock_id      : INT <<FK>>
+    account_id    : INT <<FK>>
+    date          : TIMESTAMP
+    quantity      : INT
+    average_price : DECIMAL(15,2)
+}
+
+entity "orders" as orders {
+  * order_id   : SERIAL <<PK>>
+  --
+    account_id : INT <<FK>>
+    stock_id   : INT <<FK>>
+    order_type : VARCHAR(4)
+    quantity   : INT
+    price      : DECIMAL(10,2)
+    status     : VARCHAR(20)
+    created_at : TIMESTAMP
+}
+
+entity "transactions" as transactions {
+  * transaction_id : SERIAL <<PK>>
+  --
+    order_id       : INT <<FK>>
+    executed_at    : TIMESTAMP
+}
+
+entity "real_time_price" as real_time_price {
+  * stock_id      : INT <<FK>>
+  * timestamp     : TIMESTAMP <<PK?>>
+    current_price : DECIMAL
+    bid_price     : DECIMAL
+    ask_price     : DECIMAL
+    volume        : INT
+    bid_volume    : INT
+    ask_volume    : INT
+}
+
+' Định nghĩa quan hệ
+users        ||--o{ accounts            : "Tạo"
+accounts     ||--o{ deposits            : "nạp tiền"
+accounts     ||--o{ withdrawals         : "rút tiền"
+accounts     ||--o{ portfolios          : "sở hữu"
+accounts     ||--o{ orders              : "đặt lệnh"
+
+companies    ||--|| companies_archive  : "backup"
+companies    ||--|| stocks              : "phát hành"
+
+stocks       ||--|| stock_update_logs  : "lưu trữ"
+stocks       }o--o{ portfolios          : "được sở hữu"
+stocks       }o--o{ orders              : "đặt lệnh"
+stocks       ||--|| real_time_price     : "giá hiện tại"
+
+orders       }o--o{ transactions        : "được ghi lại"
+
+@enduml
