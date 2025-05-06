@@ -58,7 +58,7 @@
       </div>
       <div class="card">
         <h3>Average Price</h3>
-        <p>{{ "{:,.2f}".format(market_data|map(attribute='current_price')|sum / (market_data|length)) }}$</p>
+        <p>{{ "{:,.0f}".format(market_data|map(attribute='current_price')|sum / (market_data|length)) }}$</p>
       </div>
     </section>
 
@@ -76,7 +76,7 @@
           {% for row in market_data %}
           <tr>
             <td><a href="{{ url_for('order_entry', stock_id=row.stock_id) }}" style="color: #007bff; text-decoration: none;">{{ row.ticker_symbol }}</a></td>
-            <td>{{ "{:,.2f}".format(row.current_price) }}$</td>
+            <td>{{ "{:,.0f}".format(row.current_price) }}$</td>
             <td>{{ row.volume }}</td>
           </tr>
           {% endfor %}

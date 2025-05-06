@@ -127,7 +127,7 @@
                           <label style="padding: 5px;">Price (USDT)</label>
                           <input name="price" type="number" step="0.01" placeholder="0.00" required />
                       </div>
-                      <button type="button" class="btn-small">Last</button>
+                     
                   </div>
                   <div class="input-row">
                       <div class="input-box">
@@ -159,8 +159,8 @@
         };
 
         // Initialize Chart.js
-        const labels = JSON.parse('{{ series | map(attribute="timestamp") | list | tojson | safe }}');
-        const data = JSON.parse('{{ series | map(attribute="current_price") | list | tojson | safe }}');
+        const labels = JSON.parse('{{ series | reverse | map(attribute="timestamp") | list | tojson | safe }}');
+        const data = JSON.parse('{{ series | reverse | map(attribute="current_price") | list | tojson | safe }}');
         const ctx = document.getElementById('priceChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',

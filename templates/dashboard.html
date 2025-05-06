@@ -87,7 +87,7 @@
               <tr>
                 <td>{{ acc.account_id }}</td>
                 <td>{{ acc.account_type }}</td>
-                <td>{{ "{:,.2f}".format(acc.balance) }}$</td>
+                <td>{{ "{:,.0f}".format(acc.balance) }}$</td>
               </tr>
               {% endfor %}
             </tbody>
