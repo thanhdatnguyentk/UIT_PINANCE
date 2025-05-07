@@ -500,5 +500,19 @@ def pending_orders():
     conn.close()
     return render_template('pending_orders.html', orders=orders, user=user, user_email=user_email)
 
+@app.route('/help')
+def help_page():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    # Lấy thông tin user cho dropdown
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    cur.close()
+    conn.close()
+    # Render template help.html
+    return render_template('help.html', user=user, user_email=user_email)
 if __name__ == '__main__':
     app.run(debug=True)

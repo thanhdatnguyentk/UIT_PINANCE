@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trợ giúp</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+  <div class="app">
+ 
+        <aside class="sidebar">
+            <div class="logo">UIT Pinance</div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('watchlist') }}">Watchlist</a>
+                <a href="{{ url_for('markets')}}">Markets</a>
+                <a href="{{ url_for('pending_orders')}}">Orders</a>
+        <a href="{{ url_for('help_page')}}">Help</a>            </nav>
+         </aside>
+
+    <div class="main-content">
+        <header class="topbar">
+            <div class="breadcrumbs">Trợ giúp</div>
+            <div class="topbar-right">
+                <div class="profile-menu">
+                    <img
+                        src="{{ url_for('static', filename='images/avatar.png') }}"
+                        alt="Avatar"
+                        class="avatar"
+                        onclick="toggleProfileDropdown()"
+                    />
+                    <div id="profileDropdown" class="dropdown-content">
+                        <div class="user-info">
+                            <img
+                                src="{{ url_for('static', filename='images/avatar.png') }}"
+                                alt="Avatar"
+                                class="avatar-lg"
+                            />
+                            <div>
+                                <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                                <p class="email">{{ user_email }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                        <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+                        <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                        <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                        <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+      <section style="padding:2rem;">
+        <h1>Trung tâm trợ giúp</h1>
+        <p>Chào mừng bạn đến với trang trợ giúp. Tại đây bạn có thể tìm hướng dẫn sử dụng các tính năng chính của ứng dụng:</p>
+        <ul>
+          <li><strong>Bảng điều khiển:</strong> Tổng quan tài khoản và giao dịch của bạn.</li>
+          <li><strong>Theo dõi:</strong> Xem danh sách cổ phiếu bạn đang nắm giữ.</li>
+          <li><strong>Thị trường:</strong> Theo dõi giá cổ phiếu và khối lượng giao dịch.</li>
+          <li><strong>Lệnh chờ:</strong> Quản lý các lệnh mua/bán đang chờ khớp.</li>
+          <li><strong>Lịch sử giao dịch:</strong> Xem lại các giao dịch đã thực hiện.</li>
+          <li><strong>Nạp/Rút tiền:</strong> Quản lý tài khoản tiền mặt.</li>
+          <li><strong>Hồ sơ:</strong> Cập nhật thông tin cá nhân.</li>
+        </ul>
+        <h2>Câu hỏi thường gặp</h2>
+        <h3>1. Làm sao để đặt lệnh mua/bán?</h3>
+        <p>Đi đến trang chi tiết cổ phiếu, chọn loại lệnh, nhập giá và khối lượng, sau đó nhấn <em>Mua/Long</em> hoặc <em>Bán/Short</em>.</p>
+        <h3>2. Làm thế nào để thêm cổ phiếu vào danh sách theo dõi?</h3>
+        <p>Chưa hỗ trợ tính năng thêm Watchlist tùy biến. Hiện tại, hệ thống tự động hiển thị cổ phiếu bạn đã mua.</p>
+        <h3>3. Tôi gặp lỗi khi đăng nhập, phải làm sao?</h3>
+        <p>Kiểm tra lại email và mật khẩu, hoặc sử dụng chức năng <em>Quên mật khẩu</em> (nếu được triển khai).</p>
+        <p>Nếu cần hỗ trợ thêm, vui lòng liên hệ bộ phận kỹ thuật qua email <a href="mailto:support@uitpinance.com">support@uitpinance.com</a>.</p>
+      </section>
+    </div>
+  </div>
+  <script>
+    // Toggle profile dropdown
+    function toggleProfileDropdown() {
+        document.getElementById('profileDropdown').classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.avatar')) {
+            document.querySelectorAll('.dropdown-content.show').forEach(c => c.classList.remove('show'));
+        }
+    };
+
+    // Initialize Chart.js
+    const labels = JSON.parse('{{ series | reverse | map(attribute="timestamp") | list | tojson | safe }}');
+    const data = JSON.parse('{{ series | reverse | map(attribute="current_price") | list | tojson | safe }}');
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: '24h Price',
+                data,
+                fill: true,
+                tension: 0.1
+            }]
+        }
+    });
+
+    // TP/SL toggle logic
+    const tpCheckbox = document.getElementById('tpCheckbox');
+    const dualInputs = document.querySelector('.dual-inputs');
+    if (tpCheckbox && dualInputs) {
+        tpCheckbox.addEventListener('change', () => {
+            dualInputs.style.display = tpCheckbox.checked ? 'flex' : 'none';
+        });
+        dualInputs.style.display = 'none'; // Initialize hidden
+    }
+</script>
+</body>
+</html>
