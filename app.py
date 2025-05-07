@@ -447,7 +447,8 @@ def transactions():
           o.order_type,
           o.quantity,
           o.price,
-          t.executed_at
+          t.executed_at,
+          s.stock_id
         FROM transactions t
         JOIN orders o      ON t.order_id   = o.order_id
         JOIN stocks s      ON o.stock_id    = s.stock_id
