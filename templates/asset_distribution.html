@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phân bố tài sản</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Giảm kích thước biểu đồ */
+        #assetChart {
+            max-width: 300px;
+            max-height: 300px;
+            margin: 0 auto;
+            /* Căn giữa biểu đồ */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">UIT Pinance</div>
+            <nav>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('watchlist') }}">Watchlist</a>
+                <a href="{{ url_for('markets') }}">Markets</a>
+                <a href="{{ url_for('pending_orders') }}">Orders</a>
+                <a href="{{ url_for('help_page') }}">Help</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="breadcrumbs">Phân bố tài sản</div>
+                <div class="topbar-right">
+                    <div class="profile-menu">
+                        <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar"
+                            onclick="toggleProfileDropdown()" />
+                        <div id="profileDropdown" class="dropdown-content">
+                            <div class="user-info">
+                                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar"
+                                    class="avatar-lg" />
+                                <div>
+                                    <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                                    <p class="email">{{ user_email }}</p>
+                                </div>
+                            </div>
+                            href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                            <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
+                            <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+                            <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+                            <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+                            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chart Section -->
+            <section class="summary-cards">
+                <div class="card">
+                    <h3>Phân bố tài sản</h3>
+                    <canvas id="assetChart"></canvas>
+                </div>
+            </section>
+            <section class="accounts-table summary-cards">
+                <div class="card">
+                    <h2>Danh sách biến động tài sản</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ngày giờ</th>
+                                <th>Loại</th>
+                                <th>Hành động</th>
+                                <th>Số tiền</th>
+                                <th>Số dư mới</th>
+                                <th>Mã cổ phiếu</th>
+                                <th>Thay đổi cổ phiếu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in movements | reverse%}
+                            <tr>
+                                <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ m.movement_category }}</td>
+                                <td>{{ m.movement_type }}</td>
+                                <td>
+                                    {% if m.amount is not none %}
+                                    {{ "{:,.0f}".format(m.amount) }}$
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if m.new_value is not none %}
+                                    {{ "{:,.0f}".format(m.new_value) }}$
+                                    {% endif %}
+                                </td>
+                                <td>{{ m.stock_id or '-' }}</td>
+                                <td>{{ m.change_quantity or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="chart-section" style="margin:2rem 1rem;">
+                <h2>Số dư tiền mặt theo thời gian</h2>
+                <canvas id="assetLineChart" width="600" height="300"></canvas>
+            </section>
+        </div>
+    </div>
+
+    <!-- Chart Script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js CDN (chỉ include 1 lần) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Lấy mảng JS từ biến Jinja cash_history, đặt tên khác để khỏi trùng
+        const timeLabels = [
+            {% for row in cash_history %}
+        "{{ row.created_at.strftime('%Y-%m-%d %H:%M') }}"{% if not loop.last %}, {% endif %}
+        {% endfor %}
+  ];
+
+        // Xây mảng values từ cash_history
+        const cashData = [
+            {% for row in cash_history %}
+        "{{ row.new_balance }}" {% if not loop.last %}, {% endif %}
+        {% endfor %}
+  ];
+
+        // Mảng giá trị cổ phiếu từ stock_history (cùng length và thứ tự)
+        const stockData = [
+            {% for row in stock_history %}
+        "{{ row.stock_value }}"{% if not loop.last %}, {% endif %}
+        {% endfor %}
+  ];
+        console.log(timeLabels);
+        console.log(cashData);
+        console.log(stockData);
+        // Line chart cho biến động số dư tiền mặt
+        const ctx = document.getElementById('assetLineChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [
+                    {
+                        label: 'Số dư tiền mặt',
+                        data: cashData,
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Thời gian' } },
+                    y: { title: { display: true, text: 'Giá trị ($)' } }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() + '$'
+                        }
+                    },
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('assetChart').getContext('2d');
+            const assetChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: {{ labels | tojson }},
+            datasets: [{
+                data: {{ values | tojson }},
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#00C49F', '#FF8042'
+            ],
+            borderWidth: 1
+          }]
+        },
+            options: {
+            responsive: true,
+            maintainAspectRatio: true // Giữ tỷ lệ khung hình
+        }
+      });
+    });
+
+        function toggleProfileDropdown() {
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+        window.onclick = function (event) {
+            if (!event.target.matches('.avatar')) {
+                var dropdowns = document.getElementsByClassName('dropdown-content');
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -442,8 +442,8 @@ def transactions():
           t.transaction_id,
           c.ticker_symbol,
           o.order_type,
-          o.quantity,
-          o.price,
+          t.quantity,
+          t.matched_price,
           t.executed_at,
           s.stock_id    
         FROM transactions t
@@ -568,6 +568,70 @@ def company_search():
         user_email=user_email
     )
 
+@app.route('/asset_distribution')
+def asset_distribution():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+
+    # Lấy thông tin user
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+
+    # Lấy số dư tiền mặt
+    cur.execute("SELECT SUM(balance) AS total_balance FROM accounts WHERE user_id = %s", (session['user_id'],))
+    balance = cur.fetchone()['total_balance'] or 0
+
+    # Lấy giá trị cổ phiếu
+    cur.execute("""
+        SELECT c.company_name AS label, SUM(p.quantity * r.current_price) AS value
+        FROM portfolios p
+        JOIN accounts a ON p.account_id = a.account_id
+        JOIN stocks s ON p.stock_id = s.stock_id
+        JOIN companies c ON s.company_id = c.company_id
+        JOIN LATERAL (
+            SELECT current_price FROM real_time_price
+            WHERE stock_id = s.stock_id
+            ORDER BY timestamp DESC
+            LIMIT 1
+        ) r ON TRUE
+        WHERE a.user_id = %s
+        GROUP BY c.company_name;
+    """, (session['user_id'],))
+    stock_data = cur.fetchall()
+
+    cur.execute("""
+        SELECT log_id, created_at, movement_category, movement_type,
+               account_id, stock_id, amount, new_value, change_quantity
+        FROM v_asset_movements
+        WHERE account_id IN (
+            SELECT account_id FROM accounts WHERE user_id = %s
+        )
+        ORDER BY created_at DESC
+        LIMIT 100;
+    """, (session['user_id'],))
+    movements = cur.fetchall()
+    cur.execute("""
+        SELECT created_at, new_balance
+        FROM account_balance_log
+        WHERE account_id IN (
+          SELECT account_id FROM accounts WHERE user_id = %s
+        )
+        ORDER BY created_at;
+    """, (session['user_id'],))
+    cash_history = cur.fetchall()
+
+
+    cur.close()
+    conn.close()
+
+    labels = ['Tiền mặt'] + [row['label'] for row in stock_data]
+    values = [float(balance)] + [float(row['value']) for row in stock_data]
+
+    return render_template('asset_distribution.html',cash_history=cash_history, labels=labels, values=values, movements=movements, user=user, user_email=user_email)
 
 if __name__ == '__main__':
     app.run(debug=True)
