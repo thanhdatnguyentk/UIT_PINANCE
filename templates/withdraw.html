@@ -25,7 +25,21 @@
 
       <div class="main-content">
         <header class="topbar">
-          <div class="breadcrumbs">Dashboard</div>
+          <div class="breadcrumbs">Rút tiền</div>
+          <div class="topbar-search">
+            <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+            <form action="{{ url_for('company_search') }}" method="get" class="search-form">
+              <input
+                type="text"
+                name="query"
+                class="search-input"
+                placeholder="Nhập mã hoặc tên công ty..."
+                required
+              />
+             <button type="submit" class="search-button">🔍</button>
+            </form>
+          </div>
+
           <div class="topbar-right">
             <div class="profile-menu">
               <img

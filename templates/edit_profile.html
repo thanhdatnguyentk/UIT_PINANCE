@@ -16,14 +16,21 @@
       <a href="#">Markets</a>
       <a href="{{ url_for('pending_orders')}}">Orders</a>     
   
-      <a href="{{ url_for('help')}}">Help</a>
+      <a href="{{ url_for('help_page')}}">Help</a>
  
     </nav>
   </aside>
 
   <div class="main-content">
     <header class="topbar">
-        <div class="breadcrumbs">Dashboard</div>
+        <div class="breadcrumbs">Chỉnh sửa thông tin</div>
+      
+        <section class="search-form-area">
+            <form method="get" action="{{ url_for('company_search') }}" class="search-form">
+                <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." value="{{ query }}" />
+                <button type="submit" class="search-button">🔍</button>
+            </form>
+        </section>
         <div class="topbar-right">
           <div class="profile-menu">
             <img

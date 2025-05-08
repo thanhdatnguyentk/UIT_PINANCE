@@ -120,9 +120,7 @@ def dashboard():
 # Watchlist: xem danh mục cổ phiếu
 @app.route('/watchlist')
 def watchlist():
-    if not session.get('user_id'):
-        flash('Vui lòng đăng nhập để xem Watchlist.', 'error')
-        return redirect(url_for('login'))
+
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user để dropdown
@@ -271,8 +269,7 @@ def logout():
 
 @app.route('/markets')
 def markets():
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
+
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user cho profile dropdown
@@ -448,7 +445,7 @@ def transactions():
           o.quantity,
           o.price,
           t.executed_at,
-          s.stock_id
+          s.stock_id    
         FROM transactions t
         JOIN orders o      ON t.order_id   = o.order_id
         JOIN stocks s      ON o.stock_id    = s.stock_id
@@ -503,8 +500,6 @@ def pending_orders():
 
 @app.route('/help')
 def help_page():
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
     # Lấy thông tin user cho dropdown
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
@@ -515,5 +510,64 @@ def help_page():
     conn.close()
     # Render template help.html
     return render_template('help.html', user=user, user_email=user_email)
+
+# Unified Company Search (lookup by ticker OR search by name)
+@app.route('/company_search', methods=['GET', 'POST'])
+def company_search():
+
+    query = None
+    company = None
+    results = []
+    
+    # Use GET for search form
+    if request.method == 'GET':
+        query = request.args.get('query', '').strip()
+    # Allow POST as well
+    if request.method == 'POST':
+        query = request.form.get('query', '').strip()
+
+
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    # First, try lookup by ticker (exact match)
+    try:
+        ticker = query.upper()
+        # CALL procedure, using placeholders for OUT params
+        cur.execute(
+            "CALL UC17_get_company_info_by_ticker(%s, %s, %s, %s, %s, %s, %s, %s)",
+            [ticker, None, None, None, None, None, None, None]
+        )
+        # Fetch OUT params
+        cur.execute("SELECT p_company_id, p_company_name, p_description, p_ticker_symbol, p_industry, p_listed_date, p_head_quarters, p_website;")
+        company = cur.fetchone()
+    except Exception:
+        # Not found or error, ignore and fallback to name search
+        conn.rollback()
+    # If no exact ticker - or simply always do name search as well
+    try:
+        name_pattern = query
+        cur.execute("SELECT * FROM UC_17_search_companies_by_name(%s)", [name_pattern])
+        results = cur.fetchall()
+        ticker_list = [r['ticker_symbol'] for r in results]
+
+    except Exception as e:
+        flash(f'Lỗi khi tìm kiếm công ty: {e}', 'error')
+    finally:
+        cur.close()
+        conn.close()
+
+    return render_template(
+        'company_search.html',
+        query=query,
+        company=company,
+        results=results,
+        user=user, 
+        user_email=user_email
+    )
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Company Search</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    /* CSS cho Tổng kết quả */
+    .search-summary-cards .card {
+      background-color: #e3f2fd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 1rem ;
+    }
+    .search-summary-cards .card h3 {
+      margin-bottom: 0.5rem;
+      color: #1976d2;
+    }
+    .search-summary-cards .card p {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #0d47a1;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">UIT Pinance</div>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('markets') }}">Markets</a>
+        <a href="{{ url_for('pending_orders') }}">Orders</a>
+        <a href="{{ url_for('help_page') }}">Help</a>
+      </nav>
+    </aside>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="breadcrumbs">Tìm kiếm công ty</div>
+        <section class="search-form-area">
+            <form method="get" action="{{ url_for('company_search') }}" class="search-form">
+                <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." value="{{ query }}" />
+                <button type="submit" class="search-button">🔍</button>
+            </form>
+        </section>
+        <div class="topbar-right">
+          <div class="profile-menu">
+            <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()" />
+            <div id="profileDropdown" class="dropdown-content">
+              <div class="user-info">
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg" />
+                <div>
+                  <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="email">{{ user_email }}</p>
+                </div>
+              </div>
+              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      
+    </header>
+      <section class="search-summary-cards">
+        <div class="card">
+          <h3>Tổng kết quả</h3>
+          <p>{{ (company is not none and 1) + results|length }}</p>
+        </div>
+      </section>
+      <section class="search-results">
+        {% if company %}
+        <div class="company-detail-card">
+          <h4>Chi tiết công ty {{ company.p_ticker_symbol }}</h4>
+          <ul>
+            <li><strong>ID:</strong> {{ company.p_company_id }}</li>
+            <li><strong>Tên:</strong> {{ company.p_company_name }}</li>
+            <li><strong>Ngành:</strong> {{ company.p_industry }}</li>
+            <li><strong>Ngày niêm yết:</strong> {{ company.p_listed_date.strftime('%Y-%m-%d') }}</li>
+            <li><strong>Website:</strong> <a href="{{ company.p_website }}" target="_blank">{{ company.p_website }}</a></li>
+          </ul>
+          <p>{{ company.p_description }}</p>
+        </div>
+        {% endif %}
+        {% if results %}
+        <div class="company-list">
+          <h4>Danh sách kết quả tìm kiếm theo tên</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên công ty</th>
+                <th>Ticker</th>
+                <th>Ngành</th>
+                <th>Ngày niêm yết</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in results %}
+              <tr>
+                <td>{{ row.company_id }}</td>
+                <td > <a href="{{ url_for('order_entry', stock_id=row.company_id) }}" style="color: #007bff; text-decoration: none;">{{ row.company_name }}</a></td>
+                <td>{{ row.ticker_symbol }}</td>
+                <td>{{ row.industry }}</td>
+                <td>{{ row.listed_date.strftime('%Y-%m-%d') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+  <script>
+    function toggleProfileDropdown() {
+      document.getElementById('profileDropdown').classList.toggle('show');
+    }
+    window.onclick = function(event) {
+      if (!event.target.matches('.avatar')) {
+        var dropdowns = document.getElementsByClassName('dropdown-content');
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>

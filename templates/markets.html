@@ -15,9 +15,9 @@
       <a href="{{ url_for('dashboard') }}">Dashboard</a>
       <a href="{{ url_for('watchlist') }}">Watchlist</a>
       <a href="{{ url_for('markets') }}" class="active">Markets</a>
-            <a href="{{ url_for('pending_orders')}}">Orders</a>     
+      <a href="{{ url_for('pending_orders')}}">Orders</a>     
   
-      <a href="{{ url_for('help')}}">Help</a>
+      <a href="{{ url_for('help_page')}}">Help</a>
  
     </nav>
   </aside>
@@ -25,6 +25,20 @@
   <div class="main-content">
     <header class="topbar">
       <div class="breadcrumbs">Markets</div>
+      <div class="topbar-search">
+        <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+        <form action="{{ url_for('company_search') }}" method="get" class="search-form">
+          <input
+            type="text"
+            name="query"
+            class="search-input"
+            placeholder="Nhập mã hoặc tên công ty..."
+            required
+          />
+         <button type="submit" class="search-button">🔍</button>
+        </form>
+      </div>
+
       <div class="topbar-right">
         <div class="profile-menu">
           <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()" />

@@ -28,6 +28,20 @@
         <div class="breadcrumbs">
           <a href="{{ url_for('markets') }}">Markets</a> / {{ stock.ticker_symbol }}
         </div>
+        <div class="topbar-search">
+          <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+          <form action="{{ url_for('company_search') }}" method="get" class="search-form">
+            <input
+              type="text"
+              name="query"
+              class="search-input"
+              placeholder="Nhập mã hoặc tên công ty..."
+              required
+            />
+           <button type="submit" class="search-button">🔍</button>
+          </form>
+        </div>
+
         <div class="topbar-right">
           <div class="profile-menu">
             <img src="{{ url_for('static', filename='images/avatar.png') }}" class="avatar" onclick="toggleProfileDropdown()" />

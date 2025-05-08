@@ -8,112 +8,205 @@
 </head>
 <body>
   <div class="app">
- 
-        <aside class="sidebar">
-            <div class="logo">UIT Pinance</div>
-            <nav>
-                <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
-                <a href="{{ url_for('watchlist') }}">Watchlist</a>
-                <a href="{{ url_for('markets')}}">Markets</a>
-                <a href="{{ url_for('pending_orders')}}">Orders</a>
-        <a href="{{ url_for('help_page')}}">Help</a>            </nav>
-         </aside>
-
+    <aside class="sidebar">
+      <div class="logo">UIT Pinance</div>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('markets') }}">Markets</a>
+        <a href="{{ url_for('pending_orders') }}">Orders</a>
+        <a href="{{ url_for('help_page') }}" class="active">Help</a>
+      </nav>
+    </aside>
     <div class="main-content">
-        <header class="topbar">
-            <div class="breadcrumbs">Trợ giúp</div>
-            <div class="topbar-right">
-                <div class="profile-menu">
-                    <img
-                        src="{{ url_for('static', filename='images/avatar.png') }}"
-                        alt="Avatar"
-                        class="avatar"
-                        onclick="toggleProfileDropdown()"
-                    />
-                    <div id="profileDropdown" class="dropdown-content">
-                        <div class="user-info">
-                            <img
-                                src="{{ url_for('static', filename='images/avatar.png') }}"
-                                alt="Avatar"
-                                class="avatar-lg"
-                            />
-                            <div>
-                                <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
-                                <p class="email">{{ user_email }}</p>
-                            </div>
-                        </div>
-                        <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                        <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-                        <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-                        <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-                        <a href="{{ url_for('logout') }}">Đăng xuất</a>
-                    </div>
+      <header class="topbar">
+        <div class="breadcrumbs">Trợ giúp</div>
+        <div class="topbar-search">
+          <form action="{{ url_for('dashboard') }}" method="get" class="search-form">
+            <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..."/>
+            <button type="submit" class="search-button">🔍</button>
+          </form>
+        </div>
+        <div class="topbar-right">
+          <div class="profile-menu">
+            <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()"/>
+            <div id="profileDropdown" class="dropdown-content">
+              <div class="user-info">
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg"/>
+                <div>
+                  <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
+                  <p class="email">{{ user_email }}</p>
                 </div>
+              </div>
+              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
+              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
+              <a href="{{ url_for('logout') }}">Đăng xuất</a>
             </div>
-        </header>
-
-    <section style="padding:2rem; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-      <h1 style="font-size: 2rem; color: #333;">Trung tâm trợ giúp</h1>
-      <p style="font-size: 1rem; color: #555;">Chào mừng bạn đến với trang trợ giúp. Tại đây bạn có thể tìm hướng dẫn sử dụng các tính năng chính của ứng dụng:</p>
-      <ul style="list-style-type: disc; padding-left: 2rem; color: #555;">
-        <li><strong>Bảng điều khiển:</strong> Tổng quan tài khoản và giao dịch của bạn.</li>
-        <li><strong>Theo dõi:</strong> Xem danh sách cổ phiếu bạn đang nắm giữ.</li>
-        <li><strong>Thị trường:</strong> Theo dõi giá cổ phiếu và khối lượng giao dịch.</li>
-        <li><strong>Lệnh chờ:</strong> Quản lý các lệnh mua/bán đang chờ khớp.</li>
-        <li><strong>Lịch sử giao dịch:</strong> Xem lại các giao dịch đã thực hiện.</li>
-        <li><strong>Nạp/Rút tiền:</strong> Quản lý tài khoản tiền mặt.</li>
-        <li><strong>Hồ sơ:</strong> Cập nhật thông tin cá nhân.</li>
-      </ul>
-      <h2 style="font-size: 1.5rem; color: #333; margin-top: 1.5rem;">Câu hỏi thường gặp</h2>
-      <h3 style="font-size: 1.25rem; color: #333; margin-top: 1rem;">1. Làm sao để đặt lệnh mua/bán?</h3>
-      <p style="font-size: 1rem; color: #555;">Đi đến trang chi tiết cổ phiếu, chọn loại lệnh, nhập giá và khối lượng, sau đó nhấn <em>Mua/Long</em> hoặc <em>Bán/Short</em>.</p>
-      <h3 style="font-size: 1.25rem; color: #333; margin-top: 1rem;">2. Làm thế nào để thêm cổ phiếu vào danh sách theo dõi?</h3>
-      <p style="font-size: 1rem; color: #555;">Chưa hỗ trợ tính năng thêm Watchlist tùy biến. Hiện tại, hệ thống tự động hiển thị cổ phiếu bạn đã mua.</p>
-      <h3 style="font-size: 1.25rem; color: #333; margin-top: 1rem;">3. Tôi gặp lỗi khi đăng nhập, phải làm sao?</h3>
-      <p style="font-size: 1rem; color: #555;">Kiểm tra lại email và mật khẩu, hoặc sử dụng chức năng <em>Quên mật khẩu</em>.</p>
-      <p style="font-size: 1rem; color: #555;">Nếu cần hỗ trợ thêm, vui lòng liên hệ bộ phận kỹ thuật qua email <a href="mailto:support@uitpinance.com" style="color: #007bff; text-decoration: none;">support@uitpinance.com</a>.</p>
-    </section>
+          </div>
+        </div>
+      </header>
+      <section class="help-content" style="padding:2rem; background:#fff; border-radius:8px;">
+        <h1>Trung tâm trợ giúp</h1>
+        <p>Chào mừng bạn đến với trang trợ giúp. Dưới đây là hướng dẫn chi tiết các bước sử dụng chính và giải đáp các câu hỏi thường gặp.</p>
+        <h2>Hướng dẫn chi tiết các tính năng</h2>
+        <ol>
+          <li><strong>Đăng ký & Đăng nhập:</strong>
+            <ul>
+              <li>Truy cập <em>/register</em> để tạo tài khoản.</li>
+              <li>Điền đầy đủ thông tin và bấm "Đăng ký".</li>
+              <li>Đăng nhập tại <em>/login</em> với email và mật khẩu.</li>
+            </ul>
+          </li>
+          <li><strong>Bảng điều khiển (Dashboard):</strong>
+            <ul>
+              <li>Xem tổng quan tài khoản, số dư và giao dịch.</li>
+            </ul>
+          </li>
+          <li><strong>Thị trường (Markets):</strong>
+            <ul>
+              <li>Xem giá, khối lượng và biểu đồ lịch sử giá.</li>
+            </ul>
+          </li>
+          <li><strong>Đặt lệnh (Orders):</strong>
+            <ul>
+              <li>Chọn BUY/SELL, nhập giá, khối lượng, TP/SL (nếu cần), bấm "Đặt lệnh".</li>
+            </ul>
+          </li>
+          <li><strong>Watchlist:</strong>
+            <ul>
+              <li>Tự động hiển thị các cổ phiếu bạn đã mua.</li>
+            </ul>
+          </li>
+          <li><strong>Lịch sử giao dịch:</strong>
+            <ul>
+              <li>Xem các giao dịch đã thực hiện.</li>
+            </ul>
+          </li>
+          <li><strong>Nạp/Rút tiền:</strong>
+            <ul>
+              <li>Chọn tài khoản, nhập số tiền và xác nhận.</li>
+            </ul>
+          </li>
+          <li><strong>Hồ sơ cá nhân:</strong>
+            <ul>
+              <li>Cập nhật thông tin cá nhân và mật khẩu.</li>
+            </ul>
+          </li>
+        </ol>
+        <h2>Câu hỏi thường gặp</h2>
+        <!-- 30 FAQs below -->
+        {% for i in range(1,31) %}
+          {% set q = '' %}
+          {% set a = '' %}
+          {% if i == 1 %}
+            {% set q = 'Làm sao để đăng ký tài khoản?' %}
+            {% set a = 'Vào trang Đăng ký, điền đầy đủ thông tin và nhấn "Đăng ký" để tạo tài khoản.' %}
+          {% elif i == 2 %}
+            {% set q = 'Làm sao để đăng nhập?' %}
+            {% set a = 'Vào trang Đăng nhập, nhập email và mật khẩu, sau đó nhấn "Đăng nhập".' %}
+          {% elif i == 3 %}
+            {% set q = 'Quên mật khẩu, phải làm sao?' %}
+            {% set a = 'Nhấn "Quên mật khẩu", nhập email để nhận hướng dẫn đặt lại mật khẩu.' %}
+          {% elif i == 4 %}
+            {% set q = 'Tại sao tôi không thể đăng ký?' %}
+            {% set a = 'Kiểm tra xem email đã được đăng ký chưa và đảm bảo điền đúng định dạng.' %}
+          {% elif i == 5 %}
+            {% set q = 'Làm sao để nạp tiền vào tài khoản?' %}
+            {% set a = 'Vào trang Nạp tiền, chọn tài khoản, nhập số tiền và xác nhận.' %}
+          {% elif i == 6 %}
+            {% set q = 'Tôi đã nạp tiền nhưng số dư không cập nhật?' %}
+            {% set a = 'Kiểm tra log giao dịch và thử tải lại trang. Nếu vẫn không đúng, liên hệ support.' %}
+          {% elif i == 7 %}
+            {% set q = 'Làm sao để rút tiền?' %}
+            {% set a = 'Vào trang Rút tiền, chọn tài khoản, nhập số tiền và xác nhận.' %}
+          {% elif i == 8 %}
+            {% set q = 'Tại sao lệnh rút bị từ chối?' %}
+            {% set a = 'Bạn cần đảm bảo số dư đủ để rút tiền.' %}
+          {% elif i == 9 %}
+            {% set q = 'Làm sao để đặt lệnh mua/bán?' %}
+            {% set a = 'Vào trang chi tiết cổ phiếu, chọn BUY/SELL, nhập giá và lượng, nhấn "Đặt lệnh".' %}
+          {% elif i == 10 %}
+            {% set q = 'Tại sao lệnh mua của tôi bị từ chối?' %}
+            {% set a = 'Kiểm tra số dư tài khoản phải lớn hơn giá * khối lượng.' %}
+          {% elif i == 11 %}
+            {% set q = 'Tại sao lệnh bán của tôi bị từ chối?' %}
+            {% set a = 'Bạn phải có đủ số cổ phiếu trong danh mục để bán.' %}
+          {% elif i == 12 %}
+            {% set q = 'Lệnh của tôi đang ở trạng thái gì?' %}
+            {% set a = 'Bạn có thể xem trạng thái lệnh trong trang Pending Orders.' %}
+          {% elif i == 13 %}
+            {% set q = 'Làm sao hủy lệnh đang chờ?' %}
+            {% set a = 'Vào trang Pending Orders, chọn lệnh và nhấn "Hủy lệnh".' %}
+          {% elif i == 14 %}
+            {% set q = 'Tôi thấy báo lỗi kết nối CSDL?' %}
+            {% set a = 'Kiểm tra kết nối mạng hoặc thử khởi động lại dịch vụ.' %}
+          {% elif i == 15 %}
+            {% set q = 'Làm sao để xem danh mục đầu tư?' %}
+            {% set a = 'Vào trang Watchlist để xem các cổ phiếu bạn đang nắm giữ.' %}
+          {% elif i == 16 %}
+            {% set q = 'Tại sao Watchlist trống?' %}
+            {% set a = 'Nếu chưa mua cổ phiếu, Watchlist sẽ không hiển thị gì.' %}
+          {% elif i == 17 %}
+            {% set q = 'Làm sao để xem lịch sử giao dịch?' %}
+            {% set a = 'Vào trang Transaction History để xem toàn bộ giao dịch.' %}
+          {% elif i == 18 %}
+            {% set q = 'Lịch sử giao dịch có lưu lại bao lâu?' %}
+            {% set a = 'Hiện tại lưu trữ toàn bộ lịch sử từ khi khởi tạo tài khoản.' %}
+          {% elif i == 19 %}
+            {% set q = 'Làm sao để xem giá cổ phiếu theo thời gian thực?' %}
+            {% set a = 'Truy cập trang Markets để xem giá mới nhất và khối lượng.' %}
+          {% elif i == 20 %}
+            {% set q = 'Có giới hạn số lượng cổ phiếu mua/bán không?' %}
+            {% set a = 'Không có giới hạn, nhưng số dư và số cổ phiếu phải đủ điều kiện.' %}
+          {% elif i == 21 %}
+            {% set q = 'Làm sao để đặt Take Profit/Stop Loss?' %}
+            {% set a = 'Tại form đặt lệnh, tích chọn TP/SL và nhập mức giá tương ứng.' %}
+          {% elif i == 22 %}
+            {% set q = 'Take Profit/Stop Loss hoạt động thế nào?' %}
+            {% set a = 'Hệ thống tự động khớp lệnh khi giá chạm ngưỡng TP hoặc SL.' %}
+          {% elif i == 23 %}
+            {% set q = 'Tôi có thể xem file báo cáo tài chính không?' %}
+            {% set a = 'Hiện tính năng này chưa hỗ trợ.' %}
+          {% elif i == 24 %}
+            {% set q = 'Có phí giao dịch không?' %}
+            {% set a = 'Các mức phí tuân theo biểu phí của sàn chứng khoán.' %}
+          {% elif i == 25 %}
+            {% set q = 'Tôi có thể giao dịch ký quỹ không?' %}
+            {% set a = 'Có, nếu tài khoản loại Margin, bạn có thể ký quỹ.' %}
+          {% elif i == 26 %}
+            {% set q = 'Làm sao để nâng cấp tài khoản sang Margin?' %}
+            {% set a = 'Liên hệ bộ phận hỗ trợ để được phê duyệt nâng cấp.' %}
+          {% elif i == 27 %}
+            {% set q = 'Tôi có thể thay đổi phương thức thanh toán không?' %}
+            {% set a = 'Vào trang Profile và chỉnh sửa mục Phương thức thanh toán.' %}
+          {% elif i == 28 %}
+            {% set q = 'Bảo mật tài khoản như thế nào?' %}
+            {% set a = 'Mật khẩu được mã hóa SHA-256, bạn nên đổi định kỳ và bảo mật thông tin.' %}
+          {% elif i == 29 %}
+            {% set q = 'Tôi muốn xóa tài khoản, có được không?' %}
+            {% set a = 'Liên hệ support để xử lý xóa tài khoản và dữ liệu.' %}
+          {% elif i == 30 %}
+            {% set q = 'Làm sao để liên hệ hỗ trợ?' %}
+            {% set a = 'Gửi email đến support@uitpinance.com hoặc gọi hotline 1900-XXXX.' %}
+          {% endif %}
+          <h3 style="margin-top:1rem;">{{ i }}. {{ q }}</h3>
+          <p>{{ a }}</p>
+        {% endfor %}
+        <p>Nếu vẫn còn thắc mắc, vui lòng liên hệ <a href="mailto:support@uitpinance.com">support@uitpinance.com</a>.</p>
+      </section>
     </div>
   </div>
   <script>
-    // Toggle profile dropdown
     function toggleProfileDropdown() {
-        document.getElementById('profileDropdown').classList.toggle('show');
+      document.getElementById('profileDropdown').classList.toggle('show');
     }
-
-    // Close dropdown when clicking outside
     window.onclick = function(event) {
-        if (!event.target.matches('.avatar')) {
-            document.querySelectorAll('.dropdown-content.show').forEach(c => c.classList.remove('show'));
-        }
+      if (!event.target.matches('.avatar')) {
+        document.querySelectorAll('.dropdown-content.show').forEach(c => c.classList.remove('show'));
+      }
     };
-
-    // Initialize Chart.js
-    const labels = JSON.parse('{{ series | reverse | map(attribute="timestamp") | list | tojson | safe }}');
-    const data = JSON.parse('{{ series | reverse | map(attribute="current_price") | list | tojson | safe }}');
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: '24h Price',
-                data,
-                fill: true,
-                tension: 0.1
-            }]
-        }
-    });
-
-    // TP/SL toggle logic
-    const tpCheckbox = document.getElementById('tpCheckbox');
-    const dualInputs = document.querySelector('.dual-inputs');
-    if (tpCheckbox && dualInputs) {
-        tpCheckbox.addEventListener('change', () => {
-            dualInputs.style.display = tpCheckbox.checked ? 'flex' : 'none';
-        });
-        dualInputs.style.display = 'none'; // Initialize hidden
-    }
-</script>
+  </script>
 </body>
 </html>

@@ -863,3 +863,54 @@ li.success {
   color: #fff;
 }
 
+.topbar-search {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+}
+
+.search-input {
+  padding: 0.5rem 15rem;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  width: 200px;
+}
+
+.search-button {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+}
+
+.search-results {
+  background: #fff;
+  border: 1px solid #ddd;
+  margin: 0 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.company-detail, .company-list {
+  margin-top: 1rem;
+}
+
+.company-detail h4, .company-list h4 {
+  margin-bottom: 0.5rem;
+}
+
+.company-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.company-list th, .company-list td {
+  padding: 0.5rem;
+  border: 1px solid #eee;
+}
