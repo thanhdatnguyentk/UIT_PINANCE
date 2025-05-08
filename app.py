@@ -610,7 +610,7 @@ def asset_distribution():
         WHERE account_id IN (
             SELECT account_id FROM accounts WHERE user_id = %s
         )
-        ORDER BY created_at DESC
+        ORDER BY created_at 
         LIMIT 100;
     """, (session['user_id'],))
     movements = cur.fetchall()
@@ -620,7 +620,7 @@ def asset_distribution():
         WHERE account_id IN (
           SELECT account_id FROM accounts WHERE user_id = %s
         )
-        ORDER BY created_at;
+        ORDER BY created_at DESC;
     """, (session['user_id'],))
     cash_history = cur.fetchall()
 
