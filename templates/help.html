@@ -15,19 +15,14 @@
         <a href="{{ url_for('watchlist') }}">Watchlist</a>
         <a href="{{ url_for('markets') }}">Markets</a>
         <a href="{{ url_for('pending_orders') }}">Orders</a>
-        <a href="{{ url_for('reports') }}" >reports</a>
+        <a href="{{ url_for('reports') }}" >Reports</a>
         <a href="{{ url_for('help_page') }}" class="active">Help</a>
       </nav>
     </aside>
     <div class="main-content">
       <header class="topbar">
         <div class="breadcrumbs">Trợ giúp</div>
-        <div class="topbar-search">
-          <form action="{{ url_for('dashboard') }}" method="get" class="search-form">
-            <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..."/>
-            <button type="submit" class="search-button">🔍</button>
-          </form>
-        </div>
+        
         <div class="topbar-right">
           <div class="profile-menu">
             <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()"/>
