@@ -620,6 +620,7 @@ def asset_distribution():
         WHERE account_id IN (
           SELECT account_id FROM accounts WHERE user_id = %s
         )
+        ORDER BY created_at;
         ORDER BY created_at ;
     """, (session['user_id'],))
     cash_history = cur.fetchall()
@@ -632,6 +633,208 @@ def asset_distribution():
     values = [float(balance)] + [float(row['value']) for row in stock_data]
 
     return render_template('asset_distribution.html',cash_history=cash_history, labels=labels, values=values, movements=movements, user=user, user_email=user_email)
+# ...existing code...
+
+@app.route('/reports', methods=['GET', 'POST'])
+def reports():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    
+    # Get user info for dropdown
+    cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id = %s", (session['user_id'],))
+    user = cur.fetchone()
+    user_email = user['email']
+    
+    report_data = None
+    selected_date = None
+    report_type = None
+    selected_account = None
+    transaction_type = None
+    start_date = None
+    end_date = None
+    accounts = []
+    
+    # Lấy danh sách tài khoản của user
+    cur.execute("SELECT account_id, account_type FROM accounts WHERE user_id = %s", (session['user_id'],))
+    accounts = cur.fetchall()
+    
+    if request.method == 'POST':
+        report_type = request.form.get('report_type')
+        
+        # Stock transactions report
+        if report_type == 'stock_transactions':
+            selected_date = request.form.get('report_date')
+            
+            if selected_date:  # Kiểm tra selected_date có tồn tại
+                cur.execute("""
+                    SELECT
+                      ROW_NUMBER() OVER (ORDER BY oml.matched_at) AS stt,
+                      c.ticker_symbol,
+                      TO_CHAR(oml.matched_at, 'YYYY-MM-DD') AS ngay_giao_dich,
+                      o.order_type,
+                      o.price AS order_price,
+                      oml.matched_price,
+                      oml.matched_quantity,
+                      oml.matched_price * oml.matched_quantity AS thanh_tien
+                    FROM orders o
+                    JOIN stocks s ON o.stock_id = s.stock_id
+                    JOIN companies c ON s.company_id = c.company_id
+                    JOIN order_matching_log oml
+                      ON (oml.order1_id = o.order_id OR oml.order2_id = o.order_id)
+                    WHERE DATE(oml.matched_at) = %s
+                      AND o.status = 'Completed'
+                      AND o.account_id IN (SELECT account_id FROM accounts WHERE user_id = %s)
+                    ORDER BY oml.matched_at
+                """, (selected_date, session['user_id']))
+                
+                report_data = cur.fetchall()
+        
+        # Stock holdings report (chỉ số lượng)
+        elif report_type == 'stock_holdings':
+            selected_account = request.form.get('account_id')
+            
+            if selected_account:  # Kiểm tra selected_account có giá trị
+                try:
+                    account_id = int(selected_account)  # Chuyển đổi sang số nguyên
+                    
+                    cur.execute("""
+                        SELECT
+                          ROW_NUMBER() OVER (ORDER BY c.ticker_symbol) AS stt,
+                          c.ticker_symbol,
+                          c.company_name,
+                          SUM(p.quantity) AS so_luong
+                        FROM portfolios p
+                        JOIN stocks s ON p.stock_id = s.stock_id
+                        JOIN companies c ON s.company_id = c.company_id
+                        WHERE p.account_id = %s
+                        GROUP BY c.ticker_symbol, c.company_name
+                        ORDER BY c.ticker_symbol
+                    """, (account_id,))
+                    
+                    report_data = cur.fetchall()
+                except ValueError:
+                    flash('Vui lòng chọn tài khoản hợp lệ', 'error')
+            else:
+                flash('Vui lòng chọn tài khoản', 'error')
+            
+        # Báo cáo lịch sử nạp/rút tiền (từ account_balance_log)
+        elif report_type == 'money_transactions':
+            selected_account = request.form.get('account_id')
+            transaction_type = request.form.get('transaction_type')
+            selected_date = request.form.get('report_date')
+            
+            # Kiểm tra các giá trị đầu vào
+            if not selected_account or not selected_date:
+                flash('Vui lòng chọn đầy đủ thông tin tài khoản và ngày', 'error')
+            else:
+                try:
+                    account_id = int(selected_account)  # Chuyển đổi sang số nguyên
+                    
+                    if transaction_type == 'deposit':
+                        # Chỉ lấy giao dịch nạp tiền
+                        cur.execute("""
+                            SELECT
+                              ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
+                              'Nạp tiền' AS loai_giao_dich,
+                              abl.change_amount AS amount,
+                              abl.new_balance AS so_du_moi,
+                              TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
+                            FROM account_balance_log abl
+                            WHERE abl.account_id = %s 
+                              AND DATE(abl.created_at) = %s
+                              AND abl.change_type = 'Deposit'
+                            ORDER BY abl.created_at
+                        """, (account_id, selected_date))
+                        
+                    elif transaction_type == 'withdrawal':
+                        # Chỉ lấy giao dịch rút tiền
+                        cur.execute("""
+                            SELECT
+                              ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
+                              'Rút tiền' AS loai_giao_dich,
+                              ABS(abl.change_amount) AS amount,
+                              abl.new_balance AS so_du_moi,
+                              TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
+                            FROM account_balance_log abl
+                            WHERE abl.account_id = %s 
+                              AND DATE(abl.created_at) = %s
+                              AND abl.change_type = 'Withdrawal'
+                            ORDER BY abl.created_at
+                        """, (account_id, selected_date))
+                        
+                    else:  # all - lấy cả nạp và rút tiền
+                        cur.execute("""
+                            SELECT
+                              ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
+                              CASE 
+                                WHEN abl.change_type = 'Deposit' THEN 'Nạp tiền'
+                                WHEN abl.change_type = 'Withdrawal' THEN 'Rút tiền'
+                                ELSE abl.change_type
+                              END AS loai_giao_dich,
+                              ABS(abl.change_amount) AS amount,
+                              abl.new_balance AS so_du_moi,
+                              TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
+                            FROM account_balance_log abl
+                            WHERE abl.account_id = %s 
+                              AND DATE(abl.created_at) = %s
+                              AND abl.change_type IN ('Deposit', 'Withdrawal')
+                            ORDER BY abl.created_at
+                        """, (account_id, selected_date))
+                    
+                    report_data = cur.fetchall()
+                except ValueError:
+                    flash('Vui lòng chọn tài khoản hợp lệ', 'error')
+                    
+        # Báo cáo biến động số dư
+        elif report_type == 'balance_history':
+            selected_account = request.form.get('account_id')
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')
+            
+            if not selected_account or not start_date or not end_date:
+                flash('Vui lòng chọn đầy đủ thông tin tài khoản và khoảng thời gian', 'error')
+            else:
+                try:
+                    account_id = int(selected_account)
+                    
+                    cur.execute("""
+                        SELECT
+                          ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
+                          TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian,
+                          abl.change_type AS loai_bien_dong,
+                          abl.change_amount AS so_tien_thay_doi,
+                          abl.new_balance AS so_du_moi,
+                          COALESCE(o.order_id::TEXT, '-') AS ma_lenh_lien_quan
+                        FROM account_balance_log abl
+                        LEFT JOIN orders o ON abl.related_order_id = o.order_id
+                        WHERE abl.account_id = %s 
+                          AND DATE(abl.created_at) BETWEEN %s AND %s
+                        ORDER BY abl.created_at
+                    """, (account_id, start_date, end_date))
+                    
+                    report_data = cur.fetchall()
+                except ValueError:
+                    flash('Vui lòng chọn tài khoản hợp lệ', 'error')
+            
+    cur.close()
+    conn.close()
+    
+    return render_template(
+        'reports.html', 
+        user=user, 
+        user_email=user_email,
+        report_data=report_data,
+        report_type=report_type,
+        selected_date=selected_date,
+        selected_account=selected_account,
+        transaction_type=transaction_type,
+        start_date=start_date,
+        end_date=end_date,
+        accounts=accounts
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
