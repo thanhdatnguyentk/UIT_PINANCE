@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Báo Cáo</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .report-params {
       padding: 15px;
@@ -130,6 +131,26 @@
     .text-danger {
       color: #dc3545;
     }
+    
+    .chart-container {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
   </style>
 </head>
 <body>
@@ -159,7 +180,7 @@
             <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar" onclick="toggleProfileDropdown()"/>
             <div id="profileDropdown" class="dropdown-content">
               <div class="user-info">
-                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg"/>
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg" />
                 <div>
                   <p class="name">{{ user.first_name }} {{ user.last_name }}</p>
                   <p class="email">{{ user_email }}</p>
@@ -185,269 +206,281 @@
             
             <form method="post" class="report-form">
               <div class="form-group">
-                <label for="report_type" class="form-label">Loại báo cáo</label>
-                <select class="form-select" id="report_type" name="report_type" required>
-                  <option value="">-- Chọn loại báo cáo --</option>
-                  <option value="stock_transactions" {% if report_type == 'stock_transactions' %}selected{% endif %}>Báo cáo giao dịch cổ phiếu theo ngày</option>
-                  <option value="stock_holdings" {% if report_type == 'stock_holdings' %}selected{% endif %}>Báo cáo số lượng cổ phiếu đang có</option>
-                  <option value="money_transactions" {% if report_type == 'money_transactions' %}selected{% endif %}>Báo cáo lịch sử nạp/rút tiền</option>
-                  <option value="balance_history" {% if report_type == 'balance_history' %}selected{% endif %}>Báo cáo biến động số dư</option>
+                <label class="form-label" for="report_type">Loại báo cáo:</label>
+                <select id="report_type" name="report_type" class="form-select" required>
+                  <option value="" {{ 'selected' if not report_type else '' }}>-- Chọn loại báo cáo --</option>
+                  <option value="stock_transactions" {{ 'selected' if report_type == 'stock_transactions' else '' }}>Báo cáo giao dịch cổ phiếu</option>
+                  <option value="stock_holdings" {{ 'selected' if report_type == 'stock_holdings' else '' }}>Báo cáo số lượng cổ phiếu đang có</option>
+                  <option value="money_transactions" {{ 'selected' if report_type == 'money_transactions' else '' }}>Báo cáo lịch sử nạp/rút tiền</option>
+                  <option value="balance_history" {{ 'selected' if report_type == 'balance_history' else '' }}>Báo cáo biến động số dư</option>
                 </select>
               </div>
 
               <!-- Tham số báo cáo giao dịch cổ phiếu -->
               <div id="stock_transactions_params" class="report-params {% if report_type != 'stock_transactions' %}d-none{% endif %}">
-                <div class="form-group">
-                  <label for="report_date" class="form-label">Chọn ngày</label>
-                  <input type="date" class="form-control" id="report_date" name="report_date" 
-                        value="{{ selected_date }}" required>
-                </div>
+                <h3>Thông số báo cáo giao dịch cổ phiếu</h3>
+                <label class="form-label" for="report_date">Ngày giao dịch:</label>
+                <input type="date" id="report_date" name="report_date" class="form-control" value="{{ selected_date or '' }}">
+                <button type="submit" class="btn btn-primary">Tạo báo cáo</button>
               </div>
 
               <!-- Tham số báo cáo số lượng cổ phiếu đang có -->
               <div id="stock_holdings_params" class="report-params {% if report_type != 'stock_holdings' %}d-none{% endif %}">
-                <div class="form-group">
-                  <label for="account_id" class="form-label">Chọn tài khoản</label>
-                  <select class="form-select" id="account_id" name="account_id" required>
-                    <option value="">-- Chọn tài khoản --</option>
-                    {% for account in accounts %}
-                      <option value="{{ account.account_id }}" {% if selected_account and selected_account|int == account.account_id %}selected{% endif %}>
-                        {{ account.account_id }} - {{ account.account_type }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
+                <h3>Thông số báo cáo số lượng cổ phiếu</h3>
+                <label class="form-label" for="account_id">Tài khoản:</label>
+                <select id="account_id" name="account_id" class="form-select">
+                  <option value="">-- Chọn tài khoản --</option>
+                  {% for account in accounts %}
+                    <option value="{{ account.account_id }}" {{ 'selected' if selected_account and selected_account|int == account.account_id else '' }}>
+                      {{ account.account_id }} - {{ account.account_type }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Tạo báo cáo</button>
               </div>
 
               <!-- Tham số báo cáo lịch sử nạp/rút tiền -->
               <div id="money_transactions_params" class="report-params {% if report_type != 'money_transactions' %}d-none{% endif %}">
-                <div class="form-group">
-                  <label for="account_id_money" class="form-label">Chọn tài khoản</label>
-                  <select class="form-select" id="account_id_money" name="account_id" required>
-                    <option value="">-- Chọn tài khoản --</option>
-                    {% for account in accounts %}
-                      <option value="{{ account.account_id }}" {% if selected_account and selected_account|int == account.account_id %}selected{% endif %}>
-                        {{ account.account_id }} - {{ account.account_type }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                <h3>Thông số báo cáo lịch sử nạp/rút tiền</h3>
+                <label class="form-label" for="account_id_money">Tài khoản:</label>
+                <select id="account_id_money" name="account_id_money" class="form-select">
+                  <option value="">-- Chọn tài khoản --</option>
+                  {% for account in accounts %}
+                    <option value="{{ account.account_id }}" {{ 'selected' if selected_account and selected_account|int == account.account_id else '' }}>
+                      {{ account.account_id }} - {{ account.account_type }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <label class="form-label" for="transaction_type">Loại giao dịch:</label>
+                <select id="transaction_type" name="transaction_type" class="form-select">
+                  <option value="all" {{ 'selected' if transaction_type == 'all' or not transaction_type else '' }}>Tất cả</option>
+                  <option value="deposit" {{ 'selected' if transaction_type == 'deposit' else '' }}>Nạp tiền</option>
+                  <option value="withdrawal" {{ 'selected' if transaction_type == 'withdrawal' else '' }}>Rút tiền</option>
+                </select>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="start_date">Từ ngày:</label>
+                    <input type="date" id="money_start_date" name="start_date" class="form-control" value="{{ start_date or '' }}">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="end_date">Đến ngày:</label>
+                    <input type="date" id="money_end_date" name="end_date" class="form-control" value="{{ end_date or '' }}">
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="transaction_type" class="form-label">Loại giao dịch</label>
-                  <select class="form-select" id="transaction_type" name="transaction_type" required>
-                    <option value="all" {% if transaction_type == 'all' %}selected{% endif %}>Tất cả</option>
-                    <option value="deposit" {% if transaction_type == 'deposit' %}selected{% endif %}>Chỉ nạp tiền</option>
-                    <option value="withdrawal" {% if transaction_type == 'withdrawal' %}selected{% endif %}>Chỉ rút tiền</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="money_report_date" class="form-label">Chọn ngày</label>
-                  <input type="date" class="form-control" id="money_report_date" name="report_date" 
-                        value="{{ selected_date }}" required>
-                </div>
-              </div>
-              
-              <!-- Tham số báo cáo biến động số dư -->
-              <div id="balance_history_params" class="report-params {% if report_type != 'balance_history' %}d-none{% endif %}">
-                <div class="form-group">
-                  <label for="account_id_balance" class="form-label">Chọn tài khoản</label>
-                  <select class="form-select" id="account_id_balance" name="account_id" required>
-                    <option value="">-- Chọn tài khoản --</option>
-                    {% for account in accounts %}
-                      <option value="{{ account.account_id }}" {% if selected_account and selected_account|int == account.account_id %}selected{% endif %}>
-                        {{ account.account_id }} - {{ account.account_type }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label for="start_date" class="form-label">Từ ngày</label>
-                  <input type="date" class="form-control" id="start_date" name="start_date" 
-                        value="{{ start_date }}" required>
-                </div>
-                <div class="form-group">
-                  <label for="end_date" class="form-label">Đến ngày</label>
-                  <input type="date" class="form-control" id="end_date" name="end_date" 
-                        value="{{ end_date }}" required>
-                </div>
+                
+                <button type="submit" class="btn btn-primary">Tạo báo cáo</button>
               </div>
 
-              <div class="form-group">
+              <!-- Tham số báo cáo biến động số dư -->
+              <div id="balance_history_params" class="report-params {% if report_type != 'balance_history' %}d-none{% endif %}">
+                <h3>Thông số báo cáo biến động số dư</h3>
+                <label class="form-label" for="account_id_balance">Tài khoản:</label>
+                <select id="account_id_balance" name="account_id_balance" class="form-select">
+                  <option value="">-- Chọn tài khoản --</option>
+                  {% for account in accounts %}
+                    <option value="{{ account.account_id }}" {{ 'selected' if selected_account and selected_account|int == account.account_id else '' }}>
+                      {{ account.account_id }} - {{ account.account_type }}
+                    </option>
+                  {% endfor %}
+                </select>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="start_date">Từ ngày:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date or '' }}">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="end_date">Đến ngày:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date or '' }}">
+                  </div>
+                </div>
+                
                 <button type="submit" class="btn btn-primary">Tạo báo cáo</button>
               </div>
             </form>
 
             {% if report_data is not none %}
-              <div class="report-result">
-                <div class="report-header">
-                  <div class="report-actions">
-                    <button id="exportPDF" class="btn btn-info">Xuất PDF</button>
-                    <button id="exportCSV" class="btn btn-success">Xuất CSV</button>
-                  </div>
-                </div>
-
-                <div id="reportContent">
-                  {% if report_type == 'stock_transactions' %}
-                    <h3 class="report-title">Báo Cáo Giao Dịch Cổ Phiếu Ngày {{ selected_date }}</h3>
-                    
-                    {% if report_data|length > 0 %}
-                      <table class="report-table">
-                        <thead>
-                          <tr>
-                            <th>STT</th>
-                            <th>Mã cổ phiếu</th>
-                            <th>Ngày giao dịch</th>
-                            <th>Loại lệnh</th>
-                            <th>Giá đặt</th>
-                            <th>Giá khớp</th>
-                            <th>Khối lượng</th>
-                            <th>Thành tiền</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for row in report_data %}
-                            <tr>
-                              <td>{{ row.stt }}</td>
-                              <td>{{ row.ticker_symbol }}</td>
-                              <td>{{ row.ngay_giao_dich }}</td>
-                              <td>{{ row.order_type }}</td>
-                              <td>{{ '{:,.0f}'.format(row.order_price) }}</td>
-                              <td>{{ '{:,.0f}'.format(row.matched_price) }}</td>
-                              <td>{{ '{:,.0f}'.format(row.matched_quantity) }}</td>
-                              <td>{{ '{:,.0f}'.format(row.thanh_tien) }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colspan="7" class="text-right"><strong>Tổng cộng:</strong></td>
-                            <td><strong>{{ '{:,.0f}'.format(report_data|sum(attribute='thanh_tien')) }}</strong></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    {% else %}
-                      <div class="alert alert-info">Không có giao dịch nào trong ngày đã chọn.</div>
-                    {% endif %}
-                  
-                  {% elif report_type == 'stock_holdings' %}
-                    <h3 class="report-title">Báo Cáo Số Lượng Cổ Phiếu Đang Nắm Giữ</h3>
-                    <p class="text-center">Tài khoản ID: {{ selected_account }}</p>
-                    
-                    {% if report_data|length > 0 %}
-                      <table class="report-table">
-                        <thead>
-                          <tr>
-                            <th>STT</th>
-                            <th>Mã cổ phiếu</th>
-                            <th>Tên công ty</th>
-                            <th>Số lượng</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for row in report_data %}
-                            <tr>
-                              <td>{{ row.stt }}</td>
-                              <td>{{ row.ticker_symbol }}</td>
-                              <td>{{ row.company_name }}</td>
-                              <td>{{ '{:,.0f}'.format(row.so_luong) }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                        <tfoot>
-                          <tr>
-                            <td colspan="3" class="text-right"><strong>Tổng số lượng:</strong></td>
-                            <td><strong>{{ '{:,.0f}'.format(report_data|sum(attribute='so_luong')) }}</strong></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    {% else %}
-                      <div class="alert alert-info">Không có cổ phiếu nào trong tài khoản đã chọn.</div>
-                    {% endif %}
-                    
-                  {% elif report_type == 'money_transactions' %}
-                    <h3 class="report-title">Báo Cáo Lịch Sử Nạp/Rút Tiền</h3>
-                    <p class="text-center">Tài khoản ID: {{ selected_account }} - Ngày: {{ selected_date }}</p>
-                    
-                    {% if report_data|length > 0 %}
-                      <table class="report-table">
-                        <thead>
-                          <tr>
-                            <th>STT</th>
-                            <th>Loại giao dịch</th>
-                            <th>Thời gian</th>
-                            <th>Số tiền</th>
-                            <th>Số dư mới</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for row in report_data %}
-                            <tr>
-                              <td>{{ row.stt }}</td>
-                              <td>{{ row.loai_giao_dich }}</td>
-                              <td>{{ row.thoi_gian_fmt if 'thoi_gian_fmt' in row else row.thoi_gian }}</td>
-                              <td>{{ '{:,.0f}'.format(row.amount) }}</td>
-                              <td>{{ '{:,.0f}'.format(row.so_du_moi) }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-                    {% else %}
-                      <div class="alert alert-info">Không có giao dịch nạp/rút tiền nào trong ngày đã chọn.</div>
-                    {% endif %}
-                  
-                  {% elif report_type == 'balance_history' %}
-                    <h3 class="report-title">Báo Cáo Biến Động Số Dư</h3>
-                    <p class="text-center">Tài khoản ID: {{ selected_account }} - Từ {{ start_date }} đến {{ end_date }}</p>
-                    
-                    {% if report_data|length > 0 %}
-                      <table class="report-table">
-                        <thead>
-                          <tr>
-                            <th>STT</th>
-                            <th>Thời gian</th>
-                            <th>Loại biến động</th>
-                            <th>Số tiền thay đổi</th>
-                            <th>Số dư mới</th>
-                            <th>Mã lệnh liên quan</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for row in report_data %}
-                            <tr>
-                              <td>{{ row.stt }}</td>
-                              <td>{{ row.thoi_gian }}</td>
-                              <td>
-                                {% if row.loai_bien_dong == 'Deposit' %}
-                                  Nạp tiền
-                                {% elif row.loai_bien_dong == 'Withdrawal' %}
-                                  Rút tiền
-                                {% elif row.loai_bien_dong == 'BuyOrderPlaced' %}
-                                  Đặt lệnh mua
-                                {% elif row.loai_bien_dong == 'BuyRefund' %}
-                                  Hoàn tiền mua dư
-                                {% elif row.loai_bien_dong == 'SellExecuted' %}
-                                  Nhận tiền từ lệnh bán
-                                {% elif row.loai_bien_dong == 'ManualAdjustment' %}
-                                  Điều chỉnh thủ công
-                                {% else %}
-                                  {{ row.loai_bien_dong }}
-                                {% endif %}
-                              </td>
-                              <td class="{% if row.so_tien_thay_doi > 0 %}text-success{% else %}text-danger{% endif %}">
-                                {{ '{:+,.0f}'.format(row.so_tien_thay_doi) }}
-                              </td>
-                              <td>{{ '{:,.0f}'.format(row.so_du_moi) }}</td>
-                              <td>{{ row.ma_lenh_lien_quan }}</td>
-                            </tr>
-                          {% endfor %}
-                        </tbody>
-                      </table>
-                    {% else %}
-                      <div class="alert alert-info">Không có biến động số dư nào trong khoảng thời gian đã chọn.</div>
-                    {% endif %}
-                  {% endif %}
-                </div>
+            <div class="report-result" id="reportContent">
+              <div class="report-actions">
+                <button id="exportCSV" class="btn btn-info">Xuất CSV</button>
+                <button id="exportPDF" class="btn btn-success">Xuất PDF</button>
               </div>
+              
+              <div class="report-header">
+                {% if report_type == 'stock_transactions' %}
+                  <div class="report-title">Báo Cáo Giao Dịch Cổ Phiếu</div>
+                  <div>Ngày giao dịch: {{ selected_date }}</div>
+                {% elif report_type == 'stock_holdings' %}
+                  <div class="report-title">Báo Cáo Số Lượng Cổ Phiếu Đang Có</div>
+                  <div>Tài khoản: {{ selected_account }}</div>
+                  
+                  <!-- Biểu đồ Donut cho cổ phiếu -->
+                  <div class="chart-container">
+                    <canvas id="stockHoldingsChart"></canvas>
+                  </div>
+                  
+                {% elif report_type == 'money_transactions' %}
+                  <div class="report-title">Báo Cáo Lịch Sử Nạp/Rút Tiền</div>
+                  <div>Tài khoản: {{ selected_account }}</div>
+                  <div>Loại giao dịch: 
+                    {% if transaction_type == 'deposit' %}Nạp tiền
+                    {% elif transaction_type == 'withdrawal' %}Rút tiền
+                    {% else %}Tất cả
+                    {% endif %}
+                  </div>
+                  <div>Khoảng thời gian: {{ start_date }} đến {{ end_date }}</div>
+                  
+                  <!-- Biểu đồ cột đối xứng cho nạp/rút tiền -->
+                  <div class="chart-container">
+                    <canvas id="moneyTransactionsChart"></canvas>
+                  </div>
+                  
+                {% elif report_type == 'balance_history' %}
+                  <div class="report-title">Báo Cáo Biến Động Số Dư</div>
+                  <div>Tài khoản: {{ selected_account }}</div>
+                  <div>Khoảng thời gian: {{ start_date }} đến {{ end_date }}</div>
+                  
+                  <!-- Biểu đồ đường cho biến động số dư -->
+                  <div class="chart-container">
+                    <canvas id="balanceHistoryChart"></canvas>
+                  </div>
+                  
+                {% endif %}
+              </div>
+              
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    {% if report_type == 'stock_transactions' %}
+                      <th>STT</th>
+                      <th>Mã CP</th>
+                      <th>Ngày giao dịch</th>
+                      <th>Loại lệnh</th>
+                      <th>Giá đặt</th>
+                      <th>Giá khớp</th>
+                      <th>Khối lượng</th>
+                      <th>Thành tiền</th>
+                    {% elif report_type == 'stock_holdings' %}
+                      <th>STT</th>
+                      <th>Mã CP</th>
+                      <th>Tên công ty</th>
+                      <th>Số lượng</th>
+                    {% elif report_type == 'money_transactions' %}
+                      <th>STT</th>
+                      <th>Loại giao dịch</th>
+                      <th>Số tiền</th>
+                      <th>Số dư mới</th>
+                      <th>Thời gian</th>
+                    {% elif report_type == 'balance_history' %}
+                      <th>STT</th>
+                      <th>Thời gian</th>
+                      <th>Loại biến động</th>
+                      <th>Số tiền thay đổi</th>
+                      <th>Số dư mới</th>
+                      <th>Mã lệnh</th>
+                    {% endif %}
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in report_data %}
+                    <tr>
+                      {% if report_type == 'stock_transactions' %}
+                        <td>{{ row.stt }}</td>
+                        <td>{{ row.ticker_symbol }}</td>
+                        <td>{{ row.ngay_giao_dich }}</td>
+                        <td>{{ row.order_type }}</td>
+                        <td class="text-right">{{ "{:,.2f}".format(row.order_price) }}</td>
+                        <td class="text-right">{{ "{:,.2f}".format(row.matched_price) }}</td>
+                        <td class="text-right">{{ row.matched_quantity }}</td>
+                        <td class="text-right">{{ "{:,.2f}".format(row.thanh_tien) }}</td>
+                      {% elif report_type == 'stock_holdings' %}
+                        <td>{{ row.stt }}</td>
+                        <td>{{ row.ticker_symbol }}</td>
+                        <td>{{ row.company_name }}</td>
+                        <td class="text-right">{{ row.so_luong }}</td>
+                      {% elif report_type == 'money_transactions' %}
+                        <td>{{ row.stt }}</td>
+                        <td>{{ row.loai_giao_dich }}</td>
+                        <td class="text-right {% if row.loai_giao_dich == 'Nạp tiền' %}text-success{% else %}text-danger{% endif %}">
+                          {{ "{:,.2f}".format(row.amount) }}
+                        </td>
+                        <td class="text-right">{{ "{:,.2f}".format(row.so_du_moi) }}</td>
+                        <td>{{ row.thoi_gian }}</td>
+                      {% elif report_type == 'balance_history' %}
+                        <td>{{ row.stt }}</td>
+                        <td>{{ row.thoi_gian }}</td>
+                        <td>{{ row.loai_bien_dong }}</td>
+                        <td class="text-right {% if row.so_tien_thay_doi > 0 %}text-success{% elif row.so_tien_thay_doi < 0 %}text-danger{% endif %}">
+                          {{ "{:,.2f}".format(row.so_tien_thay_doi) }}
+                        </td>
+                        <td class="text-right">{{ "{:,.2f}".format(row.so_du_moi) }}</td>
+                        <td>{{ row.ma_lenh_lien_quan }}</td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+                <tfoot>
+                  {% if report_type == 'stock_transactions' %}
+                    <!-- Tính tổng giá trị -->
+                    {% set total_thanh_tien = namespace(value=0) %}
+                    {% for row in report_data %}
+                      {% set total_thanh_tien.value = total_thanh_tien.value + row.thanh_tien %}
+                    {% endfor %}
+                    <tr>
+                      <td colspan="7" class="text-right"><strong>Tổng giá trị:</strong></td>
+                      <td class="text-right"><strong>{{ "{:,.2f}".format(total_thanh_tien.value) }}</strong></td>
+                    </tr>
+                  {% elif report_type == 'stock_holdings' %}
+                    <!-- Tính tổng số lượng -->
+                    {% set total_quantity = namespace(value=0) %}
+                    {% for row in report_data %}
+                      {% set total_quantity.value = total_quantity.value + row.so_luong %}
+                    {% endfor %}
+                    <tr>
+                      <td colspan="3" class="text-right"><strong>Tổng số lượng:</strong></td>
+                      <td class="text-right"><strong>{{ total_quantity.value }}</strong></td>
+                    </tr>
+                  {% elif report_type == 'money_transactions' %}
+                    <!-- Tính tổng nạp/rút -->
+                    {% set total_deposit = namespace(value=0) %}
+                    {% set total_withdrawal = namespace(value=0) %}
+                    {% for row in report_data %}
+                      {% if row.loai_giao_dich == 'Nạp tiền' %}
+                        {% set total_deposit.value = total_deposit.value + row.amount %}
+                      {% elif row.loai_giao_dich == 'Rút tiền' %}
+                        {% set total_withdrawal.value = total_withdrawal.value + row.amount %}
+                      {% endif %}
+                    {% endfor %}
+                    <tr>
+                      <td colspan="2" class="text-right"><strong>Tổng nạp:</strong></td>
+                      <td class="text-right text-success"><strong>{{ "{:,.2f}".format(total_deposit.value) }}</strong></td>
+                      <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" class="text-right"><strong>Tổng rút:</strong></td>
+                      <td class="text-right text-danger"><strong>{{ "{:,.2f}".format(total_withdrawal.value) }}</strong></td>
+                      <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" class="text-right"><strong>Chênh lệch:</strong></td>
+                      <td class="text-right {% if total_deposit.value - total_withdrawal.value > 0 %}text-success{% elif total_deposit.value - total_withdrawal.value < 0 %}text-danger{% endif %}">
+                        <strong>{{ "{:,.2f}".format(total_deposit.value - total_withdrawal.value) }}</strong>
+                      </td>
+                      <td colspan="2"></td>
+                    </tr>
+                  {% endif %}
+                </tfoot>
+              </table>
+              
+              <div class="report-footer">
+                <div>Ngày xuất báo cáo: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}</div>
+              </div>
+            </div>
+            {% else %}
+              {% if report_type %}
+                <div class="alert alert-info">Không có dữ liệu báo cáo cho tham số đã chọn.</div>
+              {% endif %}
             {% endif %}
           </div>
         </div>
@@ -460,6 +493,173 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
+    // Chart.js biểu đồ
+    document.addEventListener('DOMContentLoaded', function() {
+      // Biểu đồ donut cho báo cáo số lượng cổ phiếu
+      if (document.getElementById('stockHoldingsChart')) {
+        const ctx = document.getElementById('stockHoldingsChart').getContext('2d');
+        const chartData = {{ chart_data|tojson|safe if chart_data else '{}' }};
+        
+        if (chartData.labels && chartData.values) {
+          new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: chartData.labels,
+              datasets: [{
+                data: chartData.values,
+                backgroundColor: [
+                  '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                  '#9966FF', '#FF9F40', '#00C49F', '#FF8042',
+                  '#F44336', '#2196F3', '#FFEB3B', '#4CAF50',
+                  '#9C27B0', '#FF5722', '#009688', '#795548'
+                ]
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                title: {
+                  display: true,
+                  text: 'Phân bổ giá trị cổ phiếu'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.label || '';
+                      let value = context.parsed || 0;
+                      let sum = context.dataset.data.reduce((a, b) => a + b, 0);
+                      let percentage = sum ? ((value / sum) * 100).toFixed(2) + "%" : "0%";
+                      return label + ': ' + value.toLocaleString() + ' (' + percentage + ')';
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+      
+      // Biểu đồ cột đối xứng cho báo cáo nạp/rút tiền
+      if (document.getElementById('moneyTransactionsChart')) {
+        const ctx = document.getElementById('moneyTransactionsChart').getContext('2d');
+        const chartData = {{ chart_data|tojson|safe if chart_data else '{}' }};
+        
+        if (chartData.labels && chartData.deposits && chartData.withdrawals) {
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: chartData.labels,
+              datasets: [
+                {
+                  label: 'Nạp tiền',
+                  data: chartData.deposits,
+                  backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                  borderColor: 'rgba(75, 192, 192, 1)',
+                  borderWidth: 1
+                },
+                {
+                  label: 'Rút tiền',
+                  data: chartData.withdrawals.map(value => -value),  // Hiển thị giá trị âm
+                  backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  borderWidth: 1
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return Math.abs(value).toLocaleString();
+                    }
+                  }
+                }
+              },
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Biểu đồ nạp/rút tiền theo ngày'
+                },
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.dataset.label || '';
+                      let value = Math.abs(context.parsed.y);
+                      return label + ': ' + value.toLocaleString();
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+      
+      // Biểu đồ đường cho báo cáo biến động số dư
+      if (document.getElementById('balanceHistoryChart')) {
+        const ctx = document.getElementById('balanceHistoryChart').getContext('2d');
+        const chartData = {{ chart_data|tojson|safe if chart_data else '{}' }};
+        
+        if (chartData.labels && chartData.balances) {
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: chartData.labels,
+              datasets: [{
+                label: 'Số dư',
+                data: chartData.balances,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.1,
+                pointRadius: 5,
+                pointHoverRadius: 7
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return value.toLocaleString();
+                    }
+                  }
+                }
+              },
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Biến động số dư theo ngày'
+                },
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.dataset.label || '';
+                      let value = context.parsed.y;
+                      return label + ': ' + value.toLocaleString();
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+    });
+  
     function toggleProfileDropdown() {
       document.getElementById('profileDropdown').classList.toggle('show');
     }
@@ -492,7 +692,8 @@
         document.getElementById('account_id') && document.getElementById('account_id').removeAttribute('required');
         document.getElementById('account_id_money') && document.getElementById('account_id_money').removeAttribute('required');
         document.getElementById('transaction_type') && document.getElementById('transaction_type').removeAttribute('required');
-        document.getElementById('money_report_date') && document.getElementById('money_report_date').removeAttribute('required');
+        document.getElementById('money_start_date') && document.getElementById('money_start_date').removeAttribute('required');
+        document.getElementById('money_end_date') && document.getElementById('money_end_date').removeAttribute('required');
         document.getElementById('account_id_balance') && document.getElementById('account_id_balance').removeAttribute('required');
         document.getElementById('start_date') && document.getElementById('start_date').removeAttribute('required');
         document.getElementById('end_date') && document.getElementById('end_date').removeAttribute('required');
@@ -504,15 +705,16 @@
         document.getElementById('report_date') && document.getElementById('report_date').removeAttribute('required');
         document.getElementById('account_id_money') && document.getElementById('account_id_money').removeAttribute('required');
         document.getElementById('transaction_type') && document.getElementById('transaction_type').removeAttribute('required');
-        document.getElementById('money_report_date') && document.getElementById('money_report_date').removeAttribute('required');
+        document.getElementById('money_start_date') && document.getElementById('money_start_date').removeAttribute('required');
+        document.getElementById('money_end_date') && document.getElementById('money_end_date').removeAttribute('required');
         document.getElementById('account_id_balance') && document.getElementById('account_id_balance').removeAttribute('required');
         document.getElementById('start_date') && document.getElementById('start_date').removeAttribute('required');
         document.getElementById('end_date') && document.getElementById('end_date').removeAttribute('required');
         
       } else if (reportType === 'money_transactions') {
         document.getElementById('account_id_money').setAttribute('required', '');
-        document.getElementById('transaction_type').setAttribute('required', '');
-        document.getElementById('money_report_date').setAttribute('required', '');
+        document.getElementById('money_start_date').setAttribute('required', '');
+        document.getElementById('money_end_date').setAttribute('required', '');
         
         // Remove required from others
         document.getElementById('report_date') && document.getElementById('report_date').removeAttribute('required');
@@ -531,7 +733,8 @@
         document.getElementById('account_id') && document.getElementById('account_id').removeAttribute('required');
         document.getElementById('account_id_money') && document.getElementById('account_id_money').removeAttribute('required');
         document.getElementById('transaction_type') && document.getElementById('transaction_type').removeAttribute('required');
-        document.getElementById('money_report_date') && document.getElementById('money_report_date').removeAttribute('required');
+        document.getElementById('money_start_date') && document.getElementById('money_start_date').removeAttribute('required');
+        document.getElementById('money_end_date') && document.getElementById('money_end_date').removeAttribute('required');
       }
     });
     
@@ -571,9 +774,10 @@
           filename = `bao_cao_so_luong_co_phieu_tk_${accountId}.pdf`;
         } else if (reportType === 'money_transactions') {
           const accountId = document.getElementById('account_id_money').value;
-          const date = document.getElementById('money_report_date').value;
+          const start = document.getElementById('money_start_date').value;
+          const end = document.getElementById('money_end_date').value;
           const transType = document.getElementById('transaction_type').value;
-          filename = `bao_cao_nap_rut_tk_${accountId}_${date}_${transType}.pdf`;
+          filename = `bao_cao_nap_rut_tk_${accountId}_${start}_${end}_${transType}.pdf`;
         } else if (reportType === 'balance_history') {
           const accountId = document.getElementById('account_id_balance').value;
           const start = document.getElementById('start_date').value;
@@ -617,9 +821,10 @@
         filename = `bao_cao_so_luong_co_phieu_tk_${accountId}.csv`;
       } else if (reportType === 'money_transactions') {
         const accountId = document.getElementById('account_id_money').value;
-        const date = document.getElementById('money_report_date').value;
+        const start = document.getElementById('money_start_date').value;
+        const end = document.getElementById('money_end_date').value;
         const transType = document.getElementById('transaction_type').value;
-        filename = `bao_cao_nap_rut_tk_${accountId}_${date}_${transType}.csv`;
+        filename = `bao_cao_nap_rut_tk_${accountId}_${start}_${end}_${transType}.csv`;
       } else if (reportType === 'balance_history') {
         const accountId = document.getElementById('account_id_balance').value;
         const start = document.getElementById('start_date').value;
@@ -643,23 +848,30 @@
       const today = new Date().toISOString().split('T')[0];
       
       // Nếu không có giá trị selected_date, thiết lập ngày hiện tại
-      if (!document.getElementById('report_date').value) {
+      if (document.getElementById('report_date') && !document.getElementById('report_date').value) {
         document.getElementById('report_date').value = today;
       }
       
-      if (!document.getElementById('money_report_date').value) {
-        document.getElementById('money_report_date').value = today;
-      }
-      
       // Thiết lập ngày bắt đầu và kết thúc cho báo cáo biến động số dư
-      if (!document.getElementById('end_date').value) {
+      if (document.getElementById('end_date') && !document.getElementById('end_date').value) {
         document.getElementById('end_date').value = today;
       }
       
-      if (!document.getElementById('start_date').value) {
+      if (document.getElementById('start_date') && !document.getElementById('start_date').value) {
         const lastWeek = new Date();
         lastWeek.setDate(lastWeek.getDate() - 7);
         document.getElementById('start_date').value = lastWeek.toISOString().split('T')[0];
+      }
+      
+      // Thiết lập khoảng thời gian cho báo cáo nạp/rút
+      if (document.getElementById('money_end_date') && !document.getElementById('money_end_date').value) {
+        document.getElementById('money_end_date').value = today;
+      }
+      
+      if (document.getElementById('money_start_date') && !document.getElementById('money_start_date').value) {
+        const lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        document.getElementById('money_start_date').value = lastWeek.toISOString().split('T')[0];
       }
     });
   </script>

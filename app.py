@@ -4,10 +4,16 @@ import datetime
 from db import get_conn
 from psycopg2 import extras
 import pandas as pd
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+@app.context_processor
+def utility_processor():
+    def now():
+        return datetime.datetime.now()
+    return dict(now=now)
 # Trang chủ: hiển thị trang dashboard nếu đã đăng nhập, ngược lại landing page
 @app.route('/')
 def index():
@@ -621,7 +627,6 @@ def asset_distribution():
           SELECT account_id FROM accounts WHERE user_id = %s
         )
         ORDER BY created_at;
-        ORDER BY created_at ;
     """, (session['user_id'],))
     cash_history = cur.fetchall()
 
@@ -656,6 +661,7 @@ def reports():
     start_date = None
     end_date = None
     accounts = []
+    chart_data = {}
     
     # Lấy danh sách tài khoản của user
     cur.execute("SELECT account_id, account_type FROM accounts WHERE user_id = %s", (session['user_id'],))
@@ -675,10 +681,10 @@ def reports():
                       c.ticker_symbol,
                       TO_CHAR(oml.matched_at, 'YYYY-MM-DD') AS ngay_giao_dich,
                       o.order_type,
-                      o.price AS order_price,
-                      oml.matched_price,
-                      oml.matched_quantity,
-                      oml.matched_price * oml.matched_quantity AS thanh_tien
+                      CAST(o.price AS FLOAT) AS order_price,
+                      CAST(oml.matched_price AS FLOAT) AS matched_price,
+                      CAST(oml.matched_quantity AS FLOAT) AS matched_quantity,
+                      CAST(oml.matched_price * oml.matched_quantity AS FLOAT) AS thanh_tien
                     FROM orders o
                     JOIN stocks s ON o.stock_id = s.stock_id
                     JOIN companies c ON s.company_id = c.company_id
@@ -691,8 +697,14 @@ def reports():
                 """, (selected_date, session['user_id']))
                 
                 report_data = cur.fetchall()
+                # Chuyển đổi kiểu dữ liệu
+                for row in report_data:
+                    row['order_price'] = float(row['order_price'])
+                    row['matched_price'] = float(row['matched_price'])
+                    row['matched_quantity'] = float(row['matched_quantity'])
+                    row['thanh_tien'] = float(row['thanh_tien'])
         
-        # Stock holdings report (chỉ số lượng)
+        # Stock holdings report (với biểu đồ donut)
         elif report_type == 'stock_holdings':
             selected_account = request.form.get('account_id')
             
@@ -700,12 +712,13 @@ def reports():
                 try:
                     account_id = int(selected_account)  # Chuyển đổi sang số nguyên
                     
+                    # Lấy dữ liệu số lượng cổ phiếu
                     cur.execute("""
                         SELECT
                           ROW_NUMBER() OVER (ORDER BY c.ticker_symbol) AS stt,
                           c.ticker_symbol,
                           c.company_name,
-                          SUM(p.quantity) AS so_luong
+                          CAST(SUM(p.quantity) AS INTEGER) AS so_luong
                         FROM portfolios p
                         JOIN stocks s ON p.stock_id = s.stock_id
                         JOIN companies c ON s.company_id = c.company_id
@@ -715,23 +728,52 @@ def reports():
                     """, (account_id,))
                     
                     report_data = cur.fetchall()
+                    # Chuyển đổi kiểu dữ liệu
+                    for row in report_data:
+                        row['so_luong'] = int(row['so_luong'])
+                    
+                    # Lấy dữ liệu giá trị cổ phiếu cho biểu đồ
+                    cur.execute("""
+                        SELECT 
+                            c.ticker_symbol,
+                            CAST(SUM(p.quantity * r.current_price) AS FLOAT) AS value
+                        FROM portfolios p
+                        JOIN stocks s ON p.stock_id = s.stock_id
+                        JOIN companies c ON s.company_id = c.company_id
+                        JOIN LATERAL (
+                            SELECT current_price FROM real_time_price
+                            WHERE stock_id = s.stock_id
+                            ORDER BY timestamp DESC
+                            LIMIT 1
+                        ) r ON TRUE
+                        WHERE p.account_id = %s
+                        GROUP BY c.ticker_symbol
+                    """, (account_id,))
+                    
+                    chart_records = cur.fetchall()
+                    chart_data = {
+                        'labels': [row['ticker_symbol'] for row in chart_records],
+                        'values': [float(row['value']) for row in chart_records]
+                    }
+                    
                 except ValueError:
                     flash('Vui lòng chọn tài khoản hợp lệ', 'error')
             else:
                 flash('Vui lòng chọn tài khoản', 'error')
             
-        # Báo cáo lịch sử nạp/rút tiền (từ account_balance_log)
+        # Báo cáo lịch sử nạp/rút tiền (với biểu đồ cột đối xứng)
         elif report_type == 'money_transactions':
-            selected_account = request.form.get('account_id')
+            selected_account = request.form.get('account_id_money')
             transaction_type = request.form.get('transaction_type')
-            selected_date = request.form.get('report_date')
+            start_date = request.form.get('start_date')
+            end_date = request.form.get('end_date')  # Thay đổi từ một ngày sang khoảng ngày
             
             # Kiểm tra các giá trị đầu vào
-            if not selected_account or not selected_date:
-                flash('Vui lòng chọn đầy đủ thông tin tài khoản và ngày', 'error')
+            if not selected_account or not start_date or not end_date:
+                flash('Vui lòng chọn đầy đủ thông tin tài khoản và khoảng thời gian', 'error')
             else:
                 try:
-                    account_id = int(selected_account)  # Chuyển đổi sang số nguyên
+                    account_id = int(selected_account)
                     
                     if transaction_type == 'deposit':
                         # Chỉ lấy giao dịch nạp tiền
@@ -739,15 +781,15 @@ def reports():
                             SELECT
                               ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
                               'Nạp tiền' AS loai_giao_dich,
-                              abl.change_amount AS amount,
-                              abl.new_balance AS so_du_moi,
+                              CAST(abl.change_amount AS FLOAT) AS amount,
+                              CAST(abl.new_balance AS FLOAT) AS so_du_moi,
                               TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
                             FROM account_balance_log abl
                             WHERE abl.account_id = %s 
-                              AND DATE(abl.created_at) = %s
+                              AND DATE(abl.created_at) BETWEEN %s AND %s
                               AND abl.change_type = 'Deposit'
                             ORDER BY abl.created_at
-                        """, (account_id, selected_date))
+                        """, (account_id, start_date, end_date))
                         
                     elif transaction_type == 'withdrawal':
                         # Chỉ lấy giao dịch rút tiền
@@ -755,15 +797,15 @@ def reports():
                             SELECT
                               ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
                               'Rút tiền' AS loai_giao_dich,
-                              ABS(abl.change_amount) AS amount,
-                              abl.new_balance AS so_du_moi,
+                              CAST(ABS(abl.change_amount) AS FLOAT) AS amount,
+                              CAST(abl.new_balance AS FLOAT) AS so_du_moi,
                               TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
                             FROM account_balance_log abl
                             WHERE abl.account_id = %s 
-                              AND DATE(abl.created_at) = %s
+                              AND DATE(abl.created_at) BETWEEN %s AND %s
                               AND abl.change_type = 'Withdrawal'
                             ORDER BY abl.created_at
-                        """, (account_id, selected_date))
+                        """, (account_id, start_date, end_date))
                         
                     else:  # all - lấy cả nạp và rút tiền
                         cur.execute("""
@@ -774,23 +816,53 @@ def reports():
                                 WHEN abl.change_type = 'Withdrawal' THEN 'Rút tiền'
                                 ELSE abl.change_type
                               END AS loai_giao_dich,
-                              ABS(abl.change_amount) AS amount,
-                              abl.new_balance AS so_du_moi,
+                              CASE 
+                                WHEN abl.change_type = 'Deposit' THEN CAST(abl.change_amount AS FLOAT)
+                                ELSE CAST(ABS(abl.change_amount) AS FLOAT)
+                              END AS amount,
+                              CAST(abl.new_balance AS FLOAT) AS so_du_moi,
                               TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian
                             FROM account_balance_log abl
                             WHERE abl.account_id = %s 
-                              AND DATE(abl.created_at) = %s
+                              AND DATE(abl.created_at) BETWEEN %s AND %s
                               AND abl.change_type IN ('Deposit', 'Withdrawal')
                             ORDER BY abl.created_at
-                        """, (account_id, selected_date))
+                        """, (account_id, start_date, end_date))
                     
                     report_data = cur.fetchall()
+                    # Chuyển đổi kiểu dữ liệu
+                    for row in report_data:
+                        row['amount'] = float(row['amount'])
+                        row['so_du_moi'] = float(row['so_du_moi'])
+                    
+                    # Thêm dữ liệu cho biểu đồ cột đối xứng
+                    # Lấy tổng nạp và rút theo ngày
+                    cur.execute("""
+                        SELECT 
+                            TO_CHAR(created_at, 'YYYY-MM-DD') AS ngay,
+                            CAST(SUM(CASE WHEN change_type = 'Deposit' THEN change_amount ELSE 0 END) AS FLOAT) AS tong_nap,
+                            CAST(SUM(CASE WHEN change_type = 'Withdrawal' THEN ABS(change_amount) ELSE 0 END) AS FLOAT) AS tong_rut
+                        FROM account_balance_log
+                        WHERE account_id = %s 
+                          AND DATE(created_at) BETWEEN %s AND %s
+                          AND change_type IN ('Deposit', 'Withdrawal')
+                        GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
+                        ORDER BY ngay
+                    """, (account_id, start_date, end_date))
+                    
+                    chart_records = cur.fetchall()
+                    chart_data = {
+                        'labels': [row['ngay'] for row in chart_records],
+                        'deposits': [float(row['tong_nap']) for row in chart_records],
+                        'withdrawals': [float(row['tong_rut']) for row in chart_records]
+                    }
+                    
                 except ValueError:
                     flash('Vui lòng chọn tài khoản hợp lệ', 'error')
                     
-        # Báo cáo biến động số dư
+        # Báo cáo biến động số dư (với biểu đồ đường)
         elif report_type == 'balance_history':
-            selected_account = request.form.get('account_id')
+            selected_account = request.form.get('account_id_balance')
             start_date = request.form.get('start_date')
             end_date = request.form.get('end_date')
             
@@ -805,8 +877,8 @@ def reports():
                           ROW_NUMBER() OVER (ORDER BY abl.created_at) AS stt,
                           TO_CHAR(abl.created_at, 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian,
                           abl.change_type AS loai_bien_dong,
-                          abl.change_amount AS so_tien_thay_doi,
-                          abl.new_balance AS so_du_moi,
+                          CAST(abl.change_amount AS FLOAT) AS so_tien_thay_doi,
+                          CAST(abl.new_balance AS FLOAT) AS so_du_moi,
                           COALESCE(o.order_id::TEXT, '-') AS ma_lenh_lien_quan
                         FROM account_balance_log abl
                         LEFT JOIN orders o ON abl.related_order_id = o.order_id
@@ -816,9 +888,39 @@ def reports():
                     """, (account_id, start_date, end_date))
                     
                     report_data = cur.fetchall()
+                    # Chuyển đổi kiểu dữ liệu
+                    for row in report_data:
+                        row['so_tien_thay_doi'] = float(row['so_tien_thay_doi'])
+                        row['so_du_moi'] = float(row['so_du_moi'])
+                    
+                    # Dữ liệu cho biểu đồ đường
+                    cur.execute("""
+                        SELECT 
+                            TO_CHAR(created_at, 'YYYY-MM-DD') AS ngay,
+                            CAST(MAX(new_balance) AS FLOAT) AS so_du_cuoi_ngay
+                        FROM (
+                            SELECT 
+                                created_at,
+                                new_balance,
+                                ROW_NUMBER() OVER (PARTITION BY TO_CHAR(created_at, 'YYYY-MM-DD') ORDER BY created_at DESC) AS rn
+                            FROM account_balance_log
+                            WHERE account_id = %s
+                              AND DATE(created_at) BETWEEN %s AND %s
+                        ) as daily_balance
+                        WHERE rn = 1
+                        GROUP BY ngay
+                        ORDER BY ngay
+                    """, (account_id, start_date, end_date))
+                    
+                    chart_records = cur.fetchall()
+                    chart_data = {
+                        'labels': [row['ngay'] for row in chart_records],
+                        'balances': [float(row['so_du_cuoi_ngay']) for row in chart_records]
+                    }
+                    
                 except ValueError:
                     flash('Vui lòng chọn tài khoản hợp lệ', 'error')
-            
+    
     cur.close()
     conn.close()
     
@@ -833,7 +935,8 @@ def reports():
         transaction_type=transaction_type,
         start_date=start_date,
         end_date=end_date,
-        accounts=accounts
+        accounts=accounts,
+        chart_data=chart_data
     )
 
 if __name__ == '__main__':
