@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="summary-cards">
+     <div class="dashboard-cards card">
+         <h3>Tổng quan</h3>
+         <div class="card"><h3>Today Sales</h3><p id="todaySales">0</p></div>
+         <div class="card"><h3>Total Sales</h3><p id="totalSales">0</p></div>
+         <div class="card"><h3>Today Revenue</h3><p id="todayRevenue">0</p></div>
+         <div class="card"><h3>Total Revenue</h3><p id="totalRevenue">0</p></div>
+        </div>
+</section>
+<section class="summary-cards">
+
+    <h3>Giám sát giao dịch & tài chính (Last 7 Days)</h3>
+    <div class="charts-container">
+        <div class="chart-card">
+            <h4>Deposits</h4>
+            <canvas id="depositsChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Withdrawals</h4>
+            <canvas id="withdrawalsChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Orders</h4>
+            <canvas id="ordersChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Transactions</h4>
+            <canvas id="transactionsChart"></canvas>
+        </div>
+    </div>
+</section>
+<section class="summary-cards">
+
+    <h3>Báo cáo cấp cao</h3>
+    <div class="charts-container">
+        <div class="chart-card">
+            <h4>New Users</h4>
+            <canvas id="newUsersChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h4>Top Traded Stocks</h4>
+            <canvas id="topStocksChart"></canvas>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

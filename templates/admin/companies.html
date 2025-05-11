@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý công ty{% endblock %}
+
+{% block content %}
+<h1>Quản lý công ty</h1>
+
+<form method="post" action="{{ url_for('admin.manage_companies') }}" class="form-search">
+    <input type="text" name="company_name" placeholder="Tìm theo tên công ty" value="{{ request.form.company_name or '' }}">
+    <button type="submit">Tìm kiếm</button>
+    <a href="{{ url_for('admin.create_company') }}" class="btn btn-primary">Thêm công ty mới</a>
+</form>
+
+<table class="table-companies">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên công ty</th>
+            <th>Ngành</th>
+            <th>Website</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for company in companies %}
+        <tr>
+            <td>{{ company.company_id }}</td>
+            <td>{{ company.company_name }}</td>
+            <td>{{ company.industry }}</td>
+            <td><a href="{{ company.website }}" target="_blank">{{ company.website }}</a></td>
+            <td>
+                <a href="{{ url_for('admin.edit_company', company_id=company.company_id) }}" class="btn btn-secondary">Edit</a>
+                <a href="{{ url_for('admin.delete_company', company_id=company.company_id) }}" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa công ty này?');">Xóa</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

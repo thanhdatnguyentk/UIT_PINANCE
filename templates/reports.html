@@ -153,6 +153,13 @@
     }
   </style>
 </head>
+<!-- Modal Thông Báo Chung -->
+<div id="globalModal" class="modal">
+  <div class="modal-content" id="modalContent">
+    <span class="close" data-target="globalModal">&times;</span>
+    <p id="modalMessage"></p>
+  </div>
+</div>
 <body>
   <div class="app">
     <aside class="sidebar">
@@ -875,5 +882,37 @@
       }
     });
   </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Lấy flash messages từ Flask
+  const raw = `{{ get_flashed_messages(with_categories=true)|tojson }}`;
+  console.log(raw);
+  const flashed = JSON.parse(raw);
+  console.log(flashed);
+  if (!flashed.length) return;
+
+  flashed.forEach(([category, msg]) => {
+    const modal   = document.getElementById('globalModal');
+    const content = document.getElementById('modalContent');
+    const message = document.getElementById('modalMessage');
+
+    // Gán class theo category
+    content.classList.toggle('success-content', category === 'success');
+    content.classList.toggle('error-content',   category === 'error');
+
+    // Hiển thị nội dung
+    message.innerText = msg;
+    modal.style.display = 'block';
+  });
+
+  // Đóng modal khi click X hoặc click ngoài
+  document.querySelectorAll('.modal .close').forEach(btn => {
+    btn.onclick = () => document.getElementById(btn.dataset.target).style.display = 'none';
+  });
+  window.onclick = e => {
+    if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+  };
+});
+</script>
 </body>
 </html>

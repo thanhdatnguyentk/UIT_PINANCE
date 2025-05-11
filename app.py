@@ -5,8 +5,12 @@ from db import get_conn
 from psycopg2 import extras
 import pandas as pd
 import datetime
+from flask import jsonify
+from app.admin import admin_bp
+
 
 app = Flask(__name__)
+app.register_blueprint(admin_bp)
 app.secret_key = 'your_secret_key'
 
 @app.context_processor
@@ -257,7 +261,7 @@ def edit_profile():
         flash('Cập nhật thông tin thành công!', 'success')
         cur.close()
         conn.close()
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('edit_profile'))
 
     cur.close()
     conn.close()
@@ -431,18 +435,29 @@ def order_entry(stock_id):
         side = request.form['side']
         tp = request.form.get('take_profit') or None
         sl = request.form.get('stop_loss') or None
-        # Insert order sử dụng account_id đúng
-        cur.execute(
-            "INSERT INTO orders (account_id, stock_id, order_type, quantity, price, status)"
-            " VALUES (%s, %s, %s, %s, %s, 'Pending') RETURNING order_id;",
-            (account_id, stock_id, side.upper(), size, price)
-        )
-        order_id = cur.fetchone()[0]
-        conn.commit()
-        flash(f'Order {order_id} placed successfully!', 'success')
-        cur.close()
-        conn.close()
-        return redirect(url_for('order_entry', stock_id=stock_id))
+        # Kiểm tra xem tài khoản có đủ tiền không
+
+        try: # Insert order sử dụng account_id đúng
+            cur.execute(
+                "INSERT INTO orders (account_id, stock_id, order_type, quantity, price, status)"
+                " VALUES (%s, %s, %s, %s, %s, 'Pending') RETURNING order_id;",
+                (account_id, stock_id, side.upper(), size, price)
+            )
+            order_id = cur.fetchone()[0]
+            conn.commit()
+            flash(f'Lệnh id {order_id}: Đã đặt thành công', 'success')
+
+            cur.close()
+            conn.close()
+            return redirect(url_for('order_entry', stock_id=stock_id))
+        except Exception as e:
+            error_message = str(e).split('\n')[0]  # Lấy dòng đầu tiên của thông báo lỗi
+            print(f" {error_message}")
+            flash(f'Error placing order: {error_message}', 'error')
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return redirect(url_for('order_entry', stock_id=stock_id))
     # GET: render order entry page
     cur.close()
     conn.close()
@@ -963,6 +978,82 @@ def reports():
         accounts=accounts,
         chart_data=chart_data
     )
+@app.route('/api/stocks', methods=['GET'])
+def api_stocks():
+    """
+    API endpoint to return all stocks joined with real-time price data as JSON.
+    """
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    cur.execute(
+        """
+        SELECT
+          s.stock_id,
+          s.company_id,
+          s.total_shares,
+          s.outstanding_shares,
+          s.status,
+          s.issue_date,
+          r.timestamp,
+          r.current_price,
+          r.bid_price,
+          r.ask_price,
+          r.volume AS trade_volume,
+          r.bid_volume,
+          r.ask_volume
+        FROM stocks s
+        LEFT JOIN real_time_price r
+          ON s.stock_id = r.stock_id
+        ORDER BY s.stock_id, r.timestamp;
+        """
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return jsonify([{
+        'stock_id': row[0],
+        'company_id': row[1],
+        'total_shares': int(row[2]),
+        'outstanding_shares': int(row[3]),
+        'status': row[4],
+        'issue_date': row[5].isoformat(),
+        'timestamp': row[6].isoformat(),
+        'current_price': float(row[7]),
+        'bid_price': float(row[8]),
+        'ask_price': float(row[9]),
+        'trade_volume': int(row[10]),
+        'bid_volume': int(row[11]),
+        'ask_volume': int(row[12])
+    } for row in rows])
 
+@app.route('/orders/<int:order_id>/cancel', methods=['POST'])
+def cancel_order(order_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=extras.DictCursor)
+    # Kiểm tra quyền sở hữu: chỉ cho user hủy lệnh của chính họ
+    cur.execute("""
+        SELECT o.account_id
+        FROM orders o
+        JOIN accounts a ON o.account_id = a.account_id
+        WHERE o.order_id = %s AND a.user_id = %s AND o.status <> 'Cancelled';
+    """, (order_id, session['user_id']))
+    row = cur.fetchone()
+    if not row:
+        flash('Không tìm thấy lệnh hợp lệ để hủy.', 'error')
+    else:
+        # Cập nhật trạng thái sang Cancelled -> trigger fn_refund_on_cancel sẽ chạy
+        cur.execute(
+            "UPDATE orders SET status = 'Cancelled' WHERE order_id = %s;",
+            (order_id,)
+        )
+        conn.commit()
+        flash(f'Lệnh #{order_id} đã được hủy.', 'success')
+
+    cur.close()
+    conn.close()
+    return redirect(url_for('pending_orders'))
 if __name__ == '__main__':
     app.run(debug=True)

@@ -9,7 +9,9 @@
 <body>
   <header class="header">
     <div class="container">
-      <div class="logo">Logo</div>
+       <div class="logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-image" style="max-width: 120px; max-height: 120px;    ">  
+      </div>
       <nav class="nav">
         <a href="{{ url_for('index') }}">Home</a>
         <a href="{{ url_for('register') }}">Register</a>

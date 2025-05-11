@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Chỉnh sửa người dùng{% endblock %}
+
+{% block content %}
+<h1>Chỉnh sửa người dùng</h1>
+
+<form method="post" action="{{ url_for('admin.edit_user', user_id=user.user_id) }}" class="form-edit-user">
+    <div class="form-group">
+        <label for="first_name">Họ</label>
+        <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+    </div>
+    <div class="form-group">
+        <label for="last_name">Tên</label>
+        <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+    </div>
+    <div class="form-group">
+        <label for="phone">Số điện thoại</label>
+        <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}">
+    </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Hủy</a>
+    </div>
+</form>
+{% endblock %}

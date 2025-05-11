@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Thêm công ty mới{% endblock %}
+
+{% block content %}
+<h1>Thêm công ty mới</h1>
+
+<form method="post" action="{{ url_for('admin.create_company') }}" class="form-search">
+    <div class="form-group">
+        <label for="company_name">Tên công ty</label>
+        <input type="text" id="company_name" name="company_name" placeholder="Nhập tên công ty" required>
+    </div>
+    <div class="form-group">
+        <label for="ticker_symbol">Mã chứng khoán</label>
+        <input type="text" id="ticker_symbol" name="ticker_symbol" placeholder="Nhập mã chứng khoán" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Mô tả</label>
+        <textarea id="description" name="description" placeholder="Nhập mô tả" rows="4"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="industry">Ngành</label>
+        <input type="text" id="industry" name="industry" placeholder="Nhập ngành" required>
+    </div>
+    <div class="form-group">
+        <label for="listed_date">Ngày niêm yết</label>
+        <input type="date" id="listed_date" name="listed_date" required>
+    </div>
+    <div class="form-group">
+        <label for="head_quarters">Trụ sở chính</label>
+        <input type="text" id="head_quarters" name="head_quarters" placeholder="Nhập trụ sở chính">
+    </div>
+    <div class="form-group">
+        <label for="website">Website</label>
+        <input type="url" id="website" name="website" placeholder="https://">
+    </div>
+    <button type="submit" class="btn btn-primary">Tạo công ty</button>
+    <a href="{{ url_for('admin.manage_companies') }}" class="btn btn-secondary">Hủy</a>
+</form>
+
+{% endblock %}

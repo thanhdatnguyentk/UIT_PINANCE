@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý người dùng{% endblock %}
+
+{% block content %}
+<h1>Quản lý người dùng</h1>
+
+<form method="post" action="{{ url_for('admin.manage_users') }}" class="form-search">
+    <input type="text" name="email" placeholder="Tìm theo email" value="{{ request.form.email or '' }}">
+    <input type="text" name="name" placeholder="Tìm theo tên" value="{{ request.form.name or '' }}">
+    <button type="submit">Tìm kiếm</button>
+</form>
+
+<table class="table-users">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td>{{ user.user_id }}</td>
+            <td>{{ user.first_name }} {{ user.last_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ 'Active' if user.is_active else 'Disabled' }}</td>
+            <td>
+                <form action="{{ url_for('admin.reset_password', user_id=user.user_id) }}" method="post" class="inline-form">
+                    <input type="password" name="new_password" placeholder="Mật khẩu mới" required>
+                    <button type="submit">Reset</button>
+                </form>
+                {% if user.is_active %}
+                    <a href="{{ url_for('admin.disable_user', user_id=user.user_id) }}">Disable</a>
+                {% else %}
+                    <a href="{{ url_for('admin.enable_user', user_id=user.user_id) }}">Enable</a>
+                {% endif %}
+                <a href="{{ url_for('admin.edit_user', user_id=user.user_id) }}">Edit</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

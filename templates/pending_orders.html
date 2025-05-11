@@ -1,59 +1,52 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lệnh đang chờ khớp</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
-</head>
-<body>
-    <div class="app">
-        <aside class="sidebar">
-          <div class="logo">UIT Pinance</div>
-          <nav>
-            <a href="{{ url_for('dashboard') }}" >Dashboard</a>
-            <a href="{{ url_for('watchlist') }}">Watchlist</a>
-            <a href="{{ url_for('markets')}}">Markets</a>
-               <a href="{{ url_for('reports') }}" >Reports</a>
-            
-            <a href="{{ url_for('pending_orders')}}" class="active">Orders</a>     
-            <a href="{{ url_for('help_page')}}">Help</a>
-  <a href="{{ url_for('help_page')}}">Help</a>       
-          </nav>
-        </aside>
 
-  <div class="main-content">
-     <header class="topbar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lệnh đang chờ khớp</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<div id="globalModal" class="modal">
+  <div class="modal-content" id="modalContent">
+    <span class="close" data-target="globalModal">&times;</span>
+    <p id="modalMessage"></p>
+  </div>
+</div>
+
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">UIT Pinance</div>
+      <nav>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('watchlist') }}">Watchlist</a>
+        <a href="{{ url_for('markets')}}">Markets</a>
+        <a href="{{ url_for('pending_orders')}}" class="active">Orders</a>
+        <a href="{{ url_for('reports') }}">Reports</a>
+
+        <a href="{{ url_for('help_page')}}">Help</a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
         <div class="breadcrumbs">Orders</div>
         <div class="topbar-search">
           <!-- Unified search: tìm theo ticker hoặc tên công ty -->
           <form action="{{ url_for('company_search') }}" method="get" class="search-form">
-            <input
-              type="text"
-              name="query"
-              class="search-input"
-              placeholder="Nhập mã hoặc tên công ty..."
-              required
-            />
-           <button type="submit" class="search-button">🔍</button>
+            <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." required />
+            <button type="submit" class="search-button">🔍</button>
           </form>
         </div>
 
         <div class="topbar-right">
           <div class="profile-menu">
-            <img
-              src="{{ url_for('static', filename='images/avatar.png') }}"
-              alt="Avatar"
-              class="avatar"
-              onclick="toggleProfileDropdown()"
-            />
+            <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar"
+              onclick="toggleProfileDropdown()" />
             <div id="profileDropdown" class="dropdown-content">
               <div class="user-info">
-                <img
-                  src="{{ url_for('static', filename='images/avatar.png') }}"
-                  alt="Avatar"
-                  class="avatar-lg"
-                />
+                <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar-lg" />
                 <div>
                   <p class="name">
                     {{ user.first_name }} {{ user.last_name }}
@@ -61,9 +54,9 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
+              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
+              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
               <a href="{{ url_for('deposit') }}">Nạp tiền</a>
               <a href="{{ url_for('withdraw') }}">Rút tiền</a>
               <a href="{{ url_for('logout') }}">Đăng xuất</a>
@@ -72,46 +65,92 @@
         </div>
       </header>
 
-    <section class="accounts-table">
-      <h2>Sổ lệnh</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Mã lệnh</th>
-            <th>Cổ phiếu</th>
-            <th>Loại</th>
-            <th>Số lượng</th>
-            <th>Giá</th>
-            <th>Thời gian đặt</th>
-            <th>Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for o in orders  %}
-          <tr>
-            <td>{{ o.order_id }}</td>
-            <td>{{ o.ticker_symbol }}</td>
-            <td>{{ o.order_type }}</td>
-            <td>{{ o.quantity }}</td>
-            <td>{{ "{:,.0f}".format(o.price) }}$</td>
-            <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-            <td>{{ o.status }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-  </div>
+      <section class="accounts-table">
+        <h2>Sổ lệnh</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Mã lệnh</th>
+              <th>Cổ phiếu</th>
+              <th>Loại</th>
+              <th>Số lượng</th>
+              <th>Giá</th>
+              <th>Thời gian đặt</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th> <!-- mới -->
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td>{{ o.order_id }}</td>
+              <td>{{ o.ticker_symbol }}</td>
+              <td>{{ o.order_type }}</td>
+              <td>{{ o.quantity }}</td>
+              <td>{{ "{:,.0f}".format(o.price) }}$</td>
+              <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+              <td>{{ o.status }}</td>
+              <td>
+                {% if o.status == 'Pending'  %}
+                <form action="{{ url_for('cancel_order', order_id=o.order_id) }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Bạn chắc chắn muốn hủy lệnh #{{ o.order_id }}?');">
+                    Hủy
+                  </button>
+                </form>
+                {% else %}
+                —
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </div>
 
-  <script>
-    function toggleProfileDropdown() {
-      document.getElementById('profileDropdown').classList.toggle('show');
-    }
-    window.onclick = function(event) {
-      if (!event.target.matches('.avatar')) {
-        document.querySelectorAll('.dropdown-content.show').forEach(el=>el.classList.remove('show'));
+    <script>
+      function toggleProfileDropdown() {
+        document.getElementById('profileDropdown').classList.toggle('show');
       }
-    };
-  </script>
+      window.onclick = function (event) {
+        if (!event.target.matches('.avatar')) {
+          document.querySelectorAll('.dropdown-content.show').forEach(el => el.classList.remove('show'));
+        }
+      };
+    </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Lấy flash messages từ Flask
+        const raw = `{{ get_flashed_messages(with_categories=true)|tojson }}`;
+        console.log(raw);
+        const flashed = JSON.parse(raw);
+        console.log(flashed);
+        if (!flashed.length) return;
+
+        flashed.forEach(([category, msg]) => {
+          const modal = document.getElementById('globalModal');
+          const content = document.getElementById('modalContent');
+          const message = document.getElementById('modalMessage');
+
+          // Gán class theo category
+          content.classList.toggle('success-content', category === 'success');
+          content.classList.toggle('error-content', category === 'error');
+
+          // Hiển thị nội dung
+          message.innerText = msg;
+          modal.style.display = 'block';
+        });
+
+        // Đóng modal khi click X hoặc click ngoài
+        document.querySelectorAll('.modal .close').forEach(btn => {
+          btn.onclick = () => document.getElementById(btn.dataset.target).style.display = 'none';
+        });
+        window.onclick = e => {
+          if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+        };
+      });
+    </script>
 </body>
+
 </html>

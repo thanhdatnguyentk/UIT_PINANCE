@@ -914,3 +914,172 @@ li.success {
   padding: 0.5rem;
   border: 1px solid #eee;
 }
+
+.flashes {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+.flashes li {
+  padding: .75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: .5rem;
+}
+.flashes li.success { background-color: #e0f4e0; color: #2e7d32; }
+.flashes li.error   { background-color: #fde0e0; color: #c62828; }
+
+/* The Modal (background) */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; 
+  max-width: 400px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close:hover,
+.close:focus {
+  color: #000;
+}
+
+.modal-content.success-content {
+  border: 1px solid #2e7d32;
+  background-color: #e0f4e0;
+}
+.modal-content.error-content {
+  border: 1px solid #c62828;
+  background-color: #fde0e0;
+}
+.modal .close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Success Popup Modal (like the one in your image) */
+.success-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.success-popup-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background-color: #f0f8f0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+}
+
+.success-icon svg {
+  width: 50px;
+  height: 50px;
+  color: #7cd992;
+}
+
+.success-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.success-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 40px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.success-button:hover {
+  background-color: #2980b9;
+}
+/* Modal Background */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Success & Error Styling */
+.success-content { border: 1px solid #2e7d32; background-color: #e0f4e0; }
+.error-content   { border: 1px solid #c62828; background-color: #fde0e0; }
+
+/* Close Button */
+.close {
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  float: right;
+}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Chỉnh sửa công ty{% endblock %}
+
+{% block content %}
+<h1>Chỉnh sửa công ty</h1>
+
+<form method="post" action="{{ url_for('admin.edit_company', company_id=company.company_id) }}" class="form-search">
+    <div class="form-group">
+        <label for="company_name">Tên công ty</label>
+        <input type="text" id="company_name" name="company_name" value="{{ company.company_name }}" required>
+    </div>
+    <div class="form-group">
+        <label for="ticker_symbol">Mã chứng khoán</label>
+        <input type="text" id="ticker_symbol" name="ticker_symbol" value="{{ company.ticker_symbol }}" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Mô tả</label>
+        <textarea id="description" name="description" rows="4">{{ company.description }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="industry">Ngành</label>
+        <input type="text" id="industry" name="industry" value="{{ company.industry }}" required>
+    </div>
+    <div class="form-group">
+        <label for="listed_date">Ngày niêm yết</label>
+        <input type="date" id="listed_date" name="listed_date" value="{{ company.listed_date.strftime('%Y-%m-%d') }}" required>
+    </div>
+    <div class="form-group">
+        <label for="head_quarters">Trụ sở chính</label>
+        <input type="text" id="head_quarters" name="head_quarters" value="{{ company.head_quarters }}">
+    </div>
+    <div class="form-group">
+        <label for="website">Website</label>
+        <input type="url" id="website" name="website" value="{{ company.website }}">
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a href="{{ url_for('admin.manage_companies') }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}
