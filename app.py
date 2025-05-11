@@ -406,6 +406,23 @@ def order_entry(stock_id):
         (stock_id,)
     )
     stock = cur.fetchone()
+    
+    # Lấy top 5 buy orders có giá cao nhất
+    cur.execute("""
+        SELECT price, total_quantity 
+        FROM v_top_buy_orders 
+        WHERE stock_id = %s
+    """, (stock_id,))
+    top_buy_orders = cur.fetchall()
+    
+    # Lấy top 5 sell orders có giá thấp nhất
+    cur.execute("""
+        SELECT price, total_quantity 
+        FROM v_top_sell_orders
+        WHERE stock_id = %s
+    """, (stock_id,))
+    top_sell_orders = cur.fetchall()
+    
     if request.method == 'POST':
         price = float(request.form['price'])
         size = float(request.form['size'])
@@ -429,8 +446,16 @@ def order_entry(stock_id):
     # GET: render order entry page
     cur.close()
     conn.close()
-    return render_template('order_entry.html', user=user, user_email=user_email, stock=stock, accounts=accounts, latest=latest,
-        series=series, company=company)
+    return render_template('order_entry.html', 
+                          user=user, 
+                          user_email=user_email, 
+                          stock=stock, 
+                          accounts=accounts, 
+                          latest=latest,
+                          series=series, 
+                          company=company,
+                          top_buy_orders=top_buy_orders,
+                          top_sell_orders=top_sell_orders)
 
 
 @app.route('/transactions')

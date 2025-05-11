@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +7,77 @@
     <title>Place Order - {{ stock.ticker_symbol }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .order-book {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+        }
+        
+        .order-book h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .order-tables {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .buy-orders, .sell-orders {
+            flex: 1;
+        }
+        
+        .buy-orders h3, .sell-orders h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .order-table th, .order-table td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .buy-row td:first-child {
+            color: #22ab94;
+            font-weight: bold;
+        }
+        
+        .sell-row td:first-child {
+            color: #f23645;
+            font-weight: bold;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .order-tables {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="app">
@@ -120,6 +192,68 @@
                 <section class="chart-section">
                     <canvas id="priceChart"></canvas>
                 </section>
+                
+                <!-- Order Book Section -->
+                <div class="order-book">
+                    <h2>Order Book</h2>
+                    <div class="order-tables">
+                        <!-- Top Buy Orders -->
+                        <div class="buy-orders">
+                            <h3>Top Buy Orders</h3>
+                            <table class="order-table">
+                                <thead>
+                                    <tr>
+                                        <th>Price (USDT)</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in top_buy_orders %}
+                                    <tr class="buy-row">
+                                        <td>{{ "{:,.2f}".format(order.price) }}</td>
+                                        <td>{{ "{:,.2f}".format(order.total_quantity) }}</td>
+                                        <td>{{ "{:,.2f}".format(order.price * order.total_quantity) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if top_buy_orders|length == 0 %}
+                                    <tr>
+                                        <td colspan="3" class="empty-message">No buy orders available</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Top Sell Orders -->
+                        <div class="sell-orders">
+                            <h3>Top Sell Orders</h3>
+                            <table class="order-table">
+                                <thead>
+                                    <tr>
+                                        <th>Price (USDT)</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in top_sell_orders %}
+                                    <tr class="sell-row">
+                                        <td>{{ "{:,.2f}".format(order.price) }}</td>
+                                        <td>{{ "{:,.2f}".format(order.total_quantity) }}</td>
+                                        <td>{{ "{:,.2f}".format(order.price * order.total_quantity) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% if top_sell_orders|length == 0 %}
+                                    <tr>
+                                        <td colspan="3" class="empty-message">No sell orders available</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
             
         </div>
@@ -160,7 +294,8 @@
                       <button type="submit" name="side" value="buy" class="btn buy modern-buy">Buy / Long</button>
                       <button type="submit" name="side" value="sell" class="btn sell modern-sell">Sell / Short</button>
                   </div>
-              </form>
+              </div>
+        </form>
     </div>
 
     <script>
