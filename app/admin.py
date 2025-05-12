@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from psycopg2.extras import RealDictCursor
 from db import get_conn
 from flask import jsonify
-
+from psycopg2 import extras
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_bp.route('/admin')
@@ -238,3 +238,47 @@ def dashboard_data():
         'orders': orders,
         'transactions': transactions
     })
+
+@admin_bp.route('/user-profits')
+def user_profits():
+    """
+    Hiển thị bảng lãi/lỗ và tài sản của người dùng.
+    Cho phép lọc theo email/đổi tên và sắp xếp theo các cột.
+    """
+    # Lấy params từ query string
+    sort_by = request.args.get('sort_by', 'total_pnl')  # realized_pnl, unrealized_pnl, total_pnl, total_assets
+    order   = request.args.get('order', 'desc').upper()  # ASC or DESC
+    search  = request.args.get('search', '')
+
+    # Xác thực sort_by và order để tránh SQL injection
+    valid_sort_columns = ['realized_pnl', 'total_assets', 'user_id', 'full_name']
+    if sort_by not in valid_sort_columns:
+        sort_by = 'realized_pnl'
+    if order not in ['ASC', 'DESC']:
+        order = 'DESC'
+
+    conn = get_conn()
+    cur  = conn.cursor(cursor_factory=RealDictCursor)
+
+    # Build query: tổng hợp lãi/lỗ và tài sản theo user
+    query = f"""
+     SELECT
+      u.user_id,
+      u.first_name || ' ' || u.last_name AS full_name,
+      v.loi_nhuan AS realized_pnl,
+      t.tai_san AS total_assets
+    FROM v_total_pnl_summary v
+    JOIN accounts a ON v.account_id = a.account_id
+    JOIN users u    ON a.user_id      = u.user_id
+    JOIN v_tai_san_tong_hop t ON a.account_id = t.account_id
+    WHERE (u.email ILIKE %s OR u.first_name ILIKE %s OR u.last_name ILIKE %s)
+    ORDER BY {sort_by} {order}
+    """
+    ilike_pattern = f"%{search}%"
+    cur.execute(query, (ilike_pattern, ilike_pattern, ilike_pattern))
+    users = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return render_template('admin/admin_user_profits.html', users=users,
+                           sort_by=sort_by, order=order, search=search)
