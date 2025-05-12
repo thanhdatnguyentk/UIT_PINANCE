@@ -64,7 +64,18 @@
           </div>
         </div>
       </header>
-
+      <section class="filter-section " style="padding:1rem; background:#fff; border-radius:4px; margin-bottom:1rem;">
+        <form method="get" action="{{ url_for('pending_orders') }}">
+          <label for="status">Trạng thái:</label>
+          <select name="status" id="status" onchange="this.form.submit()">
+            <option value="All" {% if status_filter=='All' %}selected{% endif %}>Tất cả</option>
+            <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>Đang chờ</option>
+            <option value="Completed" {% if status_filter=='Completed' %}selected{% endif %}>Hoàn thành</option>
+            <option value="Cancelled" {% if status_filter=='Cancelled' %}selected{% endif %}>Đã hủy</option>
+          </select>
+          <noscript><button type="submit">Lọc</button></noscript>
+        </form>
+      </section>
       <section class="accounts-table">
         <h2>Sổ lệnh</h2>
         <table>
@@ -91,7 +102,7 @@
               <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               <td>{{ o.status }}</td>
               <td>
-                {% if o.status == 'Pending'  %}
+                {% if o.status == 'Pending' %}
                 <form action="{{ url_for('cancel_order', order_id=o.order_id) }}" method="post" style="display:inline;">
                   <button type="submit" class="btn btn-danger btn-sm"
                     onclick="return confirm('Bạn chắc chắn muốn hủy lệnh #{{ o.order_id }}?');">

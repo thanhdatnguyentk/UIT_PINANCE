@@ -7,7 +7,7 @@ import pandas as pd
 import datetime
 from flask import jsonify
 from app.admin import admin_bp
-
+from waitress import serve
 
 app = Flask(__name__)
 app.register_blueprint(admin_bp)
@@ -518,31 +518,43 @@ def transactions():
 def pending_orders():
     if not session.get('user_id'):
         return redirect(url_for('login'))
+
+    # 1) Lấy tham số lọc từ URL, mặc định là All
+    status_filter = request.args.get('status', 'All')
+
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
-    # Lấy các lệnh có status Pending cho user
-    cur.execute(
-        """
-        SELECT o.order_id, c.ticker_symbol, o.order_type, o.quantity, o.price, o.created_at, o.status
-        FROM orders o
-        JOIN stocks s ON o.stock_id = s.stock_id
-        JOIN companies c ON s.company_id = c.company_id
-        WHERE o.account_id IN (
-            SELECT account_id FROM accounts WHERE user_id = %s
-        )
-        ORDER BY o.created_at DESC;
-        """, (session['user_id'],)
-    )
+
+    # 2) Chuyển thành điều kiện SQL: nếu 'All' thì không lọc, ngược lại so sánh o.status
+    sql = """
+      SELECT o.order_id, c.ticker_symbol, o.order_type, o.quantity, o.price, o.created_at, o.status
+      FROM orders o
+      JOIN stocks s ON o.stock_id = s.stock_id
+      JOIN companies c ON s.company_id = c.company_id
+      WHERE o.account_id IN (
+        SELECT account_id FROM accounts WHERE user_id = %s
+      )
+      AND (%s = 'All' OR o.status = %s)
+      ORDER BY o.created_at DESC
+    """
+    cur.execute(sql, (session['user_id'], status_filter, status_filter))
     orders = cur.fetchall()
 
-    # Lấy thông tin user cho dropdown
+    # 3) Lấy thông tin user cho dropdown
     cur.execute("SELECT first_name, last_name, email FROM users WHERE user_id=%s", (session['user_id'],))
     user = cur.fetchone()
     user_email = user['email']
 
     cur.close()
     conn.close()
-    return render_template('pending_orders.html', orders=orders, user=user, user_email=user_email)
+
+    return render_template(
+        'pending_orders.html',
+        orders=orders,
+        user=user,
+        user_email=user_email,
+        status_filter=status_filter  # truyền xuống template
+    )
 
 @app.route('/help')
 def help_page():
@@ -1056,4 +1068,5 @@ def cancel_order(order_id):
     conn.close()
     return redirect(url_for('pending_orders'))
 if __name__ == '__main__':
+    # serve(app, host='127.0.0.1', port=5000)
     app.run(debug=True)
