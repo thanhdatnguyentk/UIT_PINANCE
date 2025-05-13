@@ -99,7 +99,7 @@
                 </td>
                 <td>{{ tx.order_type }}</td>
                 <td>{{ tx.quantity }}</td>
-                <td>{{ "{:,.0f}".format(tx.matched_price) }}$</td>
+                <td>{{ "{:,.2f}".format(tx.matched_price) }}$</td>
                 <td>{{ tx.executed_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               </tr>
               {% endfor %}

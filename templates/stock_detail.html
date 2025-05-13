@@ -67,15 +67,15 @@
       <section class="summary-cards">
         <div class="card">
           <h3>Current Price</h3>
-          <p>{{ "{:,.0f}".format(latest.current_price) }}$</p>
+          <p>{{ "{:,.2f}".format(latest.current_price) }}$</p>
         </div>
         <div class="card">
           <h3>Bid</h3>
-          <p>{{ "{:,.0f}".format(latest.bid_price) }}$</p>
+          <p>{{ "{:,.2f}".format(latest.bid_price) }}$</p>
         </div>
         <div class="card">
           <h3>Ask</h3>
-          <p>{{ "{:,.0f}".format(latest.ask_price) }}$</p>
+          <p>{{ "{:,.2f}".format(latest.ask_price) }}$</p>
         </div>
         <div class="card">
           <h3>Volume</h3>

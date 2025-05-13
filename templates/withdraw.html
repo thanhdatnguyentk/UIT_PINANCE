@@ -79,7 +79,7 @@
           <select name="account_id" id="account_id" required>
             {% for acc in accounts %}
             <option value="{{ acc.account_id }}">
-              {{ acc.account_type }} - {{ "{:,.0f}".format(acc.balance) }}$
+              {{ acc.account_type }} - {{ "{:,.2f}".format(acc.balance) }}$
             </option>
             {% endfor %}
           </select>

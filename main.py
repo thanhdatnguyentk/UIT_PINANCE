@@ -68,6 +68,25 @@ def register():
                 "INSERT INTO users (first_name, last_name, gender, birthday, email, phone, payment_method, password) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
                 (first_name, last_name, gender, birthday, email, phone, payment_method, hashed)
             )
+            # thêm cho người dùng 1000 đô vào tài khoản
+            #get account_id
+            cur.execute(
+                "SELECT account_id FROM accounts WHERE user_id = currval('users_user_id_seq');"
+            )
+            acc_id = cur.fetchone()[0]
+            cur.execute(
+                "UPDATE accounts set balance = 1000 where account_id = %s;",
+                (acc_id, )
+            )
+            # thêm cho người dùng 100 stock mỗi loại cổ phiếu
+            cur.execute(
+                """
+                INSERT INTO portfolios (account_id, stock_id,date, quantity)
+                SELECT %s, stock_id, now(), 100
+                FROM stocks;
+                """
+                , (acc_id, )
+            )
             conn.commit()
             cur.close()
             conn.close()
@@ -162,6 +181,9 @@ def watchlist():
 def deposit():
     if not session.get('user_id'):
         return redirect(url_for('login'))
+    
+    flash('Tính năng hiện không khả dụng', 'error')
+    return redirect(url_for('dashboard'))
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user cho dropdown
@@ -192,6 +214,9 @@ def deposit():
 def withdraw():
     if not session.get('user_id'):
         return redirect(url_for('login'))
+    
+    flash('Tính năng hiện không khả dụng', 'error')
+    return redirect(url_for('dashboard'))
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user cho dropdown

@@ -227,12 +227,12 @@
                                 <td>{{ m.movement_type }}</td>
                                 <td>
                                     {% if m.amount is not none %}
-                                    {{ "{:,.0f}".format(m.amount) }}$
+                                    {{ "{:,.2f}".format(m.amount) }}$
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if m.new_value is not none %}
-                                    {{ "{:,.0f}".format(m.new_value) }}$
+                                    {{ "{:,.2f}".format(m.new_value) }}$
                                     {% endif %}
                                 </td>
                             </tr>
