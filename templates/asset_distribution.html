@@ -8,12 +8,84 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Giảm kích thước biểu đồ */
+        .container-flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .table-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .chart-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         #assetChart {
-            max-width: 300px;
-            max-height: 300px;
+            max-width: 350px;
+            max-height: 350px;
             margin: 0 auto;
-            /* Căn giữa biểu đồ */
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background-color: #f2f2f2;
+        }
+
+        .summary-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .positive-value {
+            color: green;
+        }
+
+        .negative-value {
+            color: red;
+        }
+
+        .currency-value::after {
+            content: ' $';
+        }
+
+        .percentage-value::after {
+            content: ' %';
+        }
+
+        .section-title {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 992px) {
+            .container-flex {
+                flex-direction: column;
+            }
+            
+            .table-section, .chart-section {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -28,7 +100,7 @@
                 <a href="{{ url_for('watchlist') }}">Watchlist</a>
                 <a href="{{ url_for('markets') }}">Markets</a>
                 <a href="{{ url_for('pending_orders') }}">Orders</a>
-                       <a href="{{ url_for('reports') }}">reports</a>
+                <a href="{{ url_for('reports') }}">Reports</a>
                 <a href="{{ url_for('help_page') }}">Help</a>
             </nav>
         </aside>
@@ -51,7 +123,7 @@
                                     <p class="email">{{ user_email }}</p>
                                 </div>
                             </div>
-                            <a  href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
+                            <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
                             <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
                             <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
                             <a href="{{ url_for('deposit') }}">Nạp tiền</a>
@@ -62,13 +134,79 @@
                 </div>
             </header>
 
-            <!-- Chart Section -->
+            <!-- Asset Distribution Section -->
             <section class="summary-cards">
                 <div class="card">
-                    <h3>Phân bố tài sản</h3>
-                    <canvas id="assetChart"></canvas>
+                    <h2 class="section-title">Tổng quan phân bố tài sản</h2>
+                    <div class="container-flex">
+                        <!-- Left Table: Asset Distribution -->
+                        <div class="table-section">
+                            <h3>Chi tiết phân bổ tài sản</h3>
+                            <table class="summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Loại tài sản</th>
+                                        <th>Giá trị ($)</th>
+                                        <th>Phân bổ (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for asset in asset_distribution %}
+                                    <tr>
+                                        <td>{{ asset.name }}</td>
+                                        <td class="currency-value">{{ "{:,.2f}".format(asset.value) }}</td>
+                                        <td class="percentage-value">{{ "{:.2f}".format(asset.percentage) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    <tr style="font-weight: bold; background-color: #eee;">
+                                        <td>Tổng tài sản</td>
+                                        <td class="currency-value">{{ "{:,.2f}".format(total_assets) }}</td>
+                                        <td class="percentage-value">100.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Middle: Chart Section -->
+                        <div class="chart-section">
+                            <canvas id="assetChart"></canvas>
+                        </div>
+                        
+                        <!-- Right Table: Profit Information -->
+                        <div class="table-section">
+                            <h3>Lợi nhuận theo cổ phiếu</h3>
+                            <table class="summary-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã CP</th>
+                                        <th>Giá vốn TB</th>
+                                        <th>KL tổng</th>
+                                        <th>Lãi (%)</th>
+                                        <th>Lãi ($)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for profit in profit_data %}
+                                    <tr>
+                                        <td>{{ profit.ticker_symbol }}</td>
+                                        <td class="currency-value">{{ "{:,.2f}".format(profit.gia_von_tb_con_lai) }}</td>
+                                        <td>{{ "{:,}".format(profit.qty_remaining) }}</td>
+                                        <td class="percentage-value {% if profit.percent_loi_nhuan > 0 %}positive-value{% elif profit.percent_loi_nhuan < 0 %}negative-value{% endif %}">
+                                            {{ "{:+.2f}".format(profit.percent_loi_nhuan) }}
+                                        </td>
+                                        <td class="currency-value {% if profit.loi_nhuan_gia_tri > 0 %}positive-value{% elif profit.loi_nhuan_gia_tri < 0 %}negative-value{% endif %}">
+                                            {{ "{:+,.2f}".format(profit.loi_nhuan_gia_tri) }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </section>
+
+            <!-- Cash Movement History -->
             <section class="accounts-table summary-cards">
                 <div class="card">
                     <h2>Biến động số dư</h2>
@@ -79,15 +217,14 @@
                                 <th>Hành động</th>
                                 <th>Số tiền</th>
                                 <th>Số dư mới</th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            {% for m in movements | reverse%}
+                            {% for m in movements | reverse %}
                             {% if m.movement_category == 'Cash' %}
                             <tr>
                                 <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td>{{ m.movement_type  }}</td>
+                                <td>{{ m.movement_type }}</td>
                                 <td>
                                     {% if m.amount is not none %}
                                     {{ "{:,.0f}".format(m.amount) }}$
@@ -98,7 +235,6 @@
                                     {{ "{:,.0f}".format(m.new_value) }}$
                                     {% endif %}
                                 </td>
-
                             </tr>
                             {% endif %}
                             {% endfor %}
@@ -106,6 +242,8 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Asset Movement History -->
             <section class="accounts-table summary-cards">
                 <div class="card">
                     <h2>Danh sách biến động tài sản</h2>
@@ -119,12 +257,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for m in movements | reverse%}
+                            {% for m in movements | reverse %}
                             {% if m.movement_category == 'Portfolio' %}
                             <tr>
                                 <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                 <td>{{ m.movement_type }}</td>
-                           
                                 <td>{{ m.stock_id or '-' }}</td>
                                 <td>{{ m.change_quantity or '-' }}</td>
                             </tr>
@@ -134,41 +271,35 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Balance Over Time Chart -->
+            <!-- Balance Over Time Chart -->
             <section class="chart-section" style="margin:2rem 1rem;">
-                <h2>Số dư tiền mặt theo thời gian</h2>
-                <canvas id="assetLineChart" width="600" height="300"></canvas>
+                <h2 style="text-align: center; margin-bottom: 20px;">Số dư tiền mặt theo thời gian</h2>
+                <div style="height: 400px; width: 100%; position: relative;">
+                    <canvas id="assetLineChart"></canvas>
+                </div>
             </section>
         </div>
     </div>
 
     <!-- Chart Script -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js CDN (chỉ include 1 lần) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Lấy mảng JS từ biến Jinja cash_history, đặt tên khác để khỏi trùng
+        // Lấy mảng JS từ biến Jinja cash_history
         const timeLabels = [
             {% for row in cash_history %}
-        "{{ row.created_at.strftime('%Y-%m-%d %H:%M') }}"{% if not loop.last %}, {% endif %}
-        {% endfor %}
-  ];
+                "{{ row.created_at.strftime('%Y-%m-%d %H:%M') }}"{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
 
-        // Xây mảng values từ cash_history
+        // Xây mảng values từ cash_history - chuyển sang kiểu số
         const cashData = [
             {% for row in cash_history %}
-        "{{ row.new_balance }}" {% if not loop.last %}, {% endif %}
-        {% endfor %}
-  ];
+                parseFloat("{{ row.new_balance }}") {% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
 
-        // Mảng giá trị cổ phiếu từ stock_history (cùng length và thứ tự)
-        const stockData = [
-            {% for row in stock_history %}
-        "{{ row.stock_value }}"{% if not loop.last %}, {% endif %}
-        {% endfor %}
-  ];
-        console.log(timeLabels);
-        console.log(cashData);
-        console.log(stockData);
         // Line chart cho biến động số dư tiền mặt
         const ctx = document.getElementById('assetLineChart').getContext('2d');
         new Chart(ctx, {
@@ -179,51 +310,96 @@
                     {
                         label: 'Số dư tiền mặt',
                         data: cashData,
-                        fill: false,
-                        tension: 0.1
+                        fill: {
+                            target: 'origin',
+                            above: 'rgba(54, 162, 235, 0.1)',
+                        },
+                        tension: 0.3,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                        pointHoverRadius: 6
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
-                    x: { title: { display: true, text: 'Thời gian' } },
-                    y: { title: { display: true, text: 'Giá trị ($)' } }
+                    x: { 
+                        title: { display: true, text: 'Thời gian' },
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' }
+                    },
+                    y: { 
+                        title: { display: true, text: 'Giá trị ($)' },
+                        grid: { display: true, color: 'rgba(0,0,0,0.05)' },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' $';
+                            }
+                        }
+                    }
                 },
                 plugins: {
                     tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        titleFont: { weight: 'bold' },
                         callbacks: {
-                            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() + '$'
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toLocaleString() + ' $';
+                            }
                         }
                     },
-                    legend: { position: 'bottom' }
+                    legend: { 
+                        position: 'bottom',
+                        labels: { font: { size: 12 } }
+                    }
                 }
             }
         });
-    </script>
 
-    <script>
+        // Donut chart cho phân bố tài sản
         document.addEventListener('DOMContentLoaded', function () {
             const ctx = document.getElementById('assetChart').getContext('2d');
             const assetChart = new Chart(ctx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: {{ labels | tojson }},
-            datasets: [{
-                data: {{ values | tojson }},
-            backgroundColor: [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                '#9966FF', '#FF9F40', '#00C49F', '#FF8042'
-            ],
-            borderWidth: 1
-          }]
-        },
-            options: {
-            responsive: true,
-            maintainAspectRatio: true // Giữ tỷ lệ khung hình
-        }
-      });
-    });
+                    datasets: [{
+                        data: {{ values | tojson }},
+                        backgroundColor: [
+                            '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0',
+                            '#9966FF', '#FF9F40', '#00C49F', '#FF8042'
+                        ],
+                        borderWidth: 1,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(2);
+                                    return `${label}: ${value.toLocaleString()}$ (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
 
         function toggleProfileDropdown() {
             document.getElementById('profileDropdown').classList.toggle('show');

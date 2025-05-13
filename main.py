@@ -661,6 +661,15 @@ def asset_distribution():
     """, (session['user_id'],))
     stock_data = cur.fetchall()
 
+    # Lấy thông tin lợi nhuận theo cổ phiếu từ view v_loi_nhuan_theo_cp
+    cur.execute("""
+        SELECT ticker_symbol, gia_von_tb_con_lai, 
+               qty_remaining, percent_loi_nhuan, loi_nhuan_gia_tri
+        FROM v_loi_nhuan_theo_cp
+        WHERE account_id IN (SELECT account_id FROM accounts WHERE user_id = %s)
+    """, (session['user_id'],))
+    profit_data = cur.fetchall()
+
     cur.execute("""
         SELECT log_id, created_at, movement_category, movement_type,
                account_id, stock_id, amount, new_value, change_quantity
@@ -672,6 +681,7 @@ def asset_distribution():
         LIMIT 100;
     """, (session['user_id'],))
     movements = cur.fetchall()
+    
     cur.execute("""
         SELECT created_at, new_balance
         FROM account_balance_log
@@ -682,15 +692,34 @@ def asset_distribution():
     """, (session['user_id'],))
     cash_history = cur.fetchall()
 
-
     cur.close()
     conn.close()
 
     labels = ['Tiền mặt'] + [row['label'] for row in stock_data]
     values = [float(balance)] + [float(row['value']) for row in stock_data]
 
-    return render_template('asset_distribution.html',cash_history=cash_history, labels=labels, values=values, movements=movements, user=user, user_email=user_email)
-# ...existing code...
+    # Tính tổng tài sản để hiển thị trong bảng phân bố
+    total_assets = float(balance) + sum(float(row['value']) for row in stock_data)
+    asset_distribution = [
+        {'name': 'Tiền mặt', 'value': float(balance), 'percentage': (float(balance)/total_assets*100 if total_assets > 0 else 0)},
+    ]
+    for row in stock_data:
+        asset_distribution.append({
+            'name': row['label'],
+            'value': float(row['value']),
+            'percentage': (float(row['value'])/total_assets*100 if total_assets > 0 else 0)
+        })
+
+    return render_template('asset_distribution.html', 
+                          cash_history=cash_history, 
+                          labels=labels, 
+                          values=values, 
+                          movements=movements, 
+                          user=user, 
+                          user_email=user_email,
+                          asset_distribution=asset_distribution,
+                          profit_data=profit_data,
+                          total_assets=total_assets)
 
 @app.route('/reports', methods=['GET', 'POST'])
 def reports():
