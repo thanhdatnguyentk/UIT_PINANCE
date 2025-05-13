@@ -231,7 +231,7 @@ def dashboard_data():
         'total_sales': total_sales,
         'today_revenue': float(today_revenue),
         'total_revenue': float(total_revenue),
-        'summary': {'total_value': float(summary[0]), 'total_volume': float(summary[1])},
+        'summary': {'total_value': float(summary[0] or 0), 'total_volume': float(summary[1] or 0)},
         'new_users': new_users,
         'deposits': deposits,
         'withdrawals': withdrawals,
