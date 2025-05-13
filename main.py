@@ -552,7 +552,8 @@ def pending_orders():
 
     # 2) Chuyển thành điều kiện SQL: nếu 'All' thì không lọc, ngược lại so sánh o.status
     sql = """
-      SELECT o.order_id, c.ticker_symbol, o.order_type, o.quantity, o.price, o.created_at, o.status
+      SELECT o.order_id, c.ticker_symbol, o.order_type, o.quantity, o.price, o.created_at, o.status,
+             o.quantity_remaining
       FROM orders o
       JOIN stocks s ON o.stock_id = s.stock_id
       JOIN companies c ON s.company_id = c.company_id
