@@ -21,6 +21,7 @@
       <th>{{ sort_link('full_name', 'Họ Tên') }}</th>
       <th>{{ sort_link('realized_pnl', 'Realized PnL') }}</th>
       <th>{{ sort_link('total_assets', 'Total Assets') }}</th>
+      <th>Hành động</th>
     </tr>
   </thead>
   <tbody>
@@ -28,8 +29,11 @@
     <tr>
       <td>{{ u.user_id }}</td>
       <td>{{ u.full_name }}</td>
-      <td>{{ '%.2f'|format(u.realized_pnl or 0) }}</td>
-      <td>{{ '%.2f'|format(u.total_assets or 0) }}</td>
+      <td>{{ '%.0f'|format(u.realized_pnl or 0) }}</td>
+      <td>{{ '%.0f'|format(u.total_assets or 0) }}</td>
+      <td>
+      <a href="{{ url_for('admin.user_transactions', user_id=u.user_id) }}" class="btn btn-primary">Xem giao dịch</a>
+      </td>
     </tr>
     {% else %}
     <tr><td colspan="6" class="text-center">Không có dữ liệu</td></tr>

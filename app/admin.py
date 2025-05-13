@@ -282,3 +282,63 @@ def user_profits():
 
     return render_template('admin/admin_user_profits.html', users=users,
                            sort_by=sort_by, order=order, search=search)
+
+@admin_bp.route('/user-transactions/<int:user_id>')
+def user_transactions(user_id):
+    """
+    Hiển thị chi tiết các giao dịch của một user: deposits, withdrawals, orders và transactions.
+    """
+    conn = get_conn()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    # Lấy tất cả accounts của user
+    cur.execute(
+        "SELECT account_id FROM accounts WHERE user_id = %s",
+        (user_id,)
+    )
+    accounts = [r['account_id'] for r in cur.fetchall()]
+    if not accounts:
+        flash('User không có tài khoản nào', 'info')
+        return redirect(url_for('admin.manage_users'))
+
+    # Lấy deposits
+    cur.execute(
+        "SELECT * FROM deposits WHERE account_id = ANY(%s) ORDER BY created_at DESC",
+        (accounts,)
+    )
+    deposits = cur.fetchall()
+    # Lấy withdrawals
+    cur.execute(
+        "SELECT * FROM withdrawals WHERE account_id = ANY(%s) ORDER BY created_at DESC",
+        (accounts,)
+    )
+    withdrawals = cur.fetchall()
+    # Lấy orders
+    cur.execute(
+        "SELECT o.*, c.ticker_symbol FROM orders o "
+        "JOIN stocks s ON o.stock_id = s.stock_id "
+        "JOIN companies c ON s.company_id = c.company_id "
+        "WHERE o.account_id = ANY(%s) ORDER BY o.created_at DESC",
+        (accounts,)
+    )
+    orders = cur.fetchall()
+    # Lấy transactions
+    cur.execute(
+        "SELECT t.*, c.ticker_symbol FROM transactions t "
+        "JOIN orders o ON t.order_id = o.order_id "
+        "JOIN stocks s ON o.stock_id = s.stock_id "
+        "JOIN companies c ON s.company_id = c.company_id "
+        "WHERE o.account_id = ANY(%s) ORDER BY t.executed_at DESC",
+        (accounts,)
+    )
+    transactions = cur.fetchall()
+
+    cur.close()
+    conn.close()
+    return render_template(
+        'admin/user_transactions.html',
+        user_id=user_id,
+        deposits=deposits,
+        withdrawals=withdrawals,
+        orders=orders,
+        transactions=transactions
+    )

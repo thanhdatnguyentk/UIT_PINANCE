@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Giao dịch User {{ user_id }}{% endblock %}
+{% block content %}
+<h1>Giao dịch chi tiết - User {{ user_id }}</h1>
+
+<section>
+  <h2>Deposits</h2>
+  <table class="table-responsive">
+    <thead><tr><th>ID</th><th>Account</th><th>Amount</th><th>Ngày</th></tr></thead>
+    <tbody>
+      {% for d in deposits %}
+      <tr>
+        <td>{{ d.deposit_id }}</td>
+        <td>{{ d.account_id }}</td>
+        <td>{{ '%.2f'|format(d.amount) }}</td>
+        <td>{{ d.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Không có deposit</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Withdrawals</h2>
+  <table class="table-responsive">
+    <thead><tr><th>ID</th><th>Account</th><th>Amount</th><th>Ngày</th></tr></thead>
+    <tbody>
+      {% for w in withdrawals %}
+      <tr>
+        <td>{{ w.withdrawal_id }}</td>
+        <td>{{ w.account_id }}</td>
+        <td>{{ '%.2f'|format(w.amount) }}</td>
+        <td>{{ w.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Không có withdrawal</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Orders</h2>
+  <table class="table-responsive">
+    <thead><tr><th>Order ID</th><th>Account</th><th>Stock</th><th>Type</th><th>Qty</th><th>Price</th><th>Ngày</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>{{ o.order_id }}</td>
+        <td>{{ o.account_id }}</td>
+        <td>{{ o.ticker_symbol }}</td>
+        <td>{{ o.order_type }}</td>
+        <td>{{ o.quantity }}</td>
+        <td>{{ '%.2f'|format(o.price) }}</td>
+        <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">Không có order</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Transactions</h2>
+  <table class="table-responsive">
+    <thead><tr><th>Txn ID</th><th>Order ID</th><th>Stock</th><th>Qty</th><th>Price</th><th>Ngày</th></tr></thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td>{{ t.transaction_id }}</td>
+        <td>{{ t.order_id }}</td>
+        <td>{{ t.ticker_symbol }}</td>
+        <td>{{ t.quantity }}</td>
+        <td>{{ '%.2f'|format(t.matched_price) }}</td>
+        <td>{{ t.executed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Không có transaction</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
