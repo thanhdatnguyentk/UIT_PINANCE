@@ -46,6 +46,17 @@
       </header>
       <section class="help-content" style="padding:2rem; background:#fff; border-radius:8px;">
         <h1>Trung tâm trợ giúp</h1>
+        <div class="help-video">
+       <h2>Video hướng dẫn sử dụng</h2>
+       <div class="video-container">
+
+         <video controls style="max-width:100%; height:auto;">
+           <source src="{{ url_for('static', filename='videos/DemoQLTT2.mp4') }}" type="video/mp4">
+         </video>
+
+       </div>
+     </div>
+
         <p>Chào mừng bạn đến với trang trợ giúp. Dưới đây là hướng dẫn chi tiết các bước sử dụng chính và giải đáp các câu hỏi thường gặp.</p>
         <h2>Hướng dẫn chi tiết các tính năng</h2>
         <ol>
@@ -186,7 +197,7 @@
             {% set a = 'Liên hệ support để xử lý xóa tài khoản và dữ liệu.' %}
           {% elif i == 30 %}
             {% set q = 'Làm sao để liên hệ hỗ trợ?' %}
-            {% set a = 'Gửi email đến support@uitpinance.com hoặc gọi hotline 1900-XXXX.' %}
+            {% set a = 'Gửi email đến support@uitpinance.com hoặc gọi hotline 030041975.' %}
           {% endif %}
           <h3 style="margin-top:1rem;">{{ i }}. {{ q }}</h3>
           <p>{{ a }}</p>
