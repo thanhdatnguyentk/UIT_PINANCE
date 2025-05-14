@@ -24,7 +24,6 @@
         <a href="{{ url_for('markets')}}">Markets</a>
         <a href="{{ url_for('pending_orders')}}" class="active">Orders</a>
         <a href="{{ url_for('reports') }}">Reports</a>
-
         <a href="{{ url_for('help_page')}}">Help</a>
       </nav>
     </aside>
@@ -85,10 +84,11 @@
               <th>Cổ phiếu</th>
               <th>Loại</th>
               <th>Số lượng</th>
+              <th>Còn lại</th> <!-- Cột mới thêm vào -->
               <th>Giá</th>
               <th>Thời gian đặt</th>
               <th>Trạng thái</th>
-              <th>Hành động</th> <!-- mới -->
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -98,6 +98,7 @@
               <td>{{ o.ticker_symbol }}</td>
               <td>{{ o.order_type }}</td>
               <td>{{ o.quantity }}</td>
+              <td>{{ o.quantity_remaining }}</td> <!-- Đã sửa từ remaining_quantity thành quantity_remaining -->
               <td>{{ "{:,.2f}".format(o.price) }}$</td>
               <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               <td>{{ o.status }}</td>
