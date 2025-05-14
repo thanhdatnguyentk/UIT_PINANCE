@@ -75,7 +75,7 @@ def register():
             )
             acc_id = cur.fetchone()[0]
             cur.execute(
-                "UPDATE accounts set balance = 1000 where account_id = %s;",
+                "UPDATE accounts set balance = 10000 where account_id = %s;",
                 (acc_id, )
             )
             # thêm cho người dùng 100 stock mỗi loại cổ phiếu
