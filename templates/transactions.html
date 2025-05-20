@@ -17,10 +17,9 @@
           <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
           <a href="{{ url_for('watchlist') }}">Watchlist</a>
           <a href="{{ url_for('markets')}}">Markets</a>
-                <a href="{{ url_for('pending_orders')}}">Orders</a>     
-               <a href="{{ url_for('reports') }}" >Reports</a>
-      
-<a href="{{ url_for('help_page')}}">Help</a>     
+          <a href="{{ url_for('pending_orders')}}">Orders</a>     
+          <a href="{{ url_for('reports') }}" >Reports</a>
+          <a href="{{ url_for('help_page')}}">Help</a>     
         </nav>
       </aside>
 
@@ -84,7 +83,9 @@
                 <th>Mã</th>
                 <th>Loại</th>
                 <th>Số lượng</th>
-                <th>Giá</th>
+                <th>Giá đặt</th>
+                <th>Giá khớp</th>
+                <th>Tổng giá trị</th>
                 <th>Thời gian</th>
               </tr>
             </thead>
@@ -99,7 +100,9 @@
                 </td>
                 <td>{{ tx.order_type }}</td>
                 <td>{{ tx.quantity }}</td>
+                <td>{{ "{:,.2f}".format(tx.order_price) }}$</td>
                 <td>{{ "{:,.2f}".format(tx.matched_price) }}$</td>
+                <td>{{ "{:,.2f}".format(tx.matched_price * tx.quantity) }}$</td>
                 <td>{{ tx.executed_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               </tr>
               {% endfor %}

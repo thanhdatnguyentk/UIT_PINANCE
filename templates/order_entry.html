@@ -75,67 +75,74 @@
             padding: 20px 0;
         }
 
+        .price-limits-info {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        padding: 15px;
+        background-color: #121212; /* Nền đen */
+        border-radius: 8px;
+        color: white;
+        }
+        
+        .price-limit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .price-limit.ceiling strong {
+            color: #9C27B0;
+            font-weight: bold;
+        }
+        
+        .price-limit.floor strong {
+            color: #3F51B5;
+            font-weight: bold;
+        }
+        
+        .price-limit.reference strong {
+            color: #FF9800;
+        }
+
+        .total-cost {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .account-balance {
+            font-weight: bold;
+            color: #22ab94;
+            font-size: 1.1em;
+        }
+
         @media (max-width: 768px) {
             .order-tables {
                 flex-direction: column;
             }
         }
-    </style>
-</head>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Đưa danh sách flash vào JS
-        try {
-            // Fix JSON parsing with proper error handling
-            const flashedRaw = '{{ get_flashed_messages(with_categories=true) | tojson | safe }}';
-            console.log("Raw flash data:", flashedRaw);
-            const flashed = JSON.parse(flashedRaw);
-            console.log("Parsed flash messages:", flashed);
-            
-            if (!flashed || !flashed.length) return;
 
-            flashed.forEach(([category, msg]) => {
-                let modalId, msgElemId;
-                if (category === 'success') {
-                    modalId = 'successModal';
-                    msgElemId = 'modalSuccessMessage';
-                } else if (category === 'error') {
-                    modalId = 'errorModal';
-                    msgElemId = 'modalErrorMessage';
-                } else {
-                    return;
-                }
-
-                const modal = document.getElementById(modalId);
-                if (modal && document.getElementById(msgElemId)) {
-                    document.getElementById(msgElemId).innerText = msg;
-                    modal.style.display = 'block';
-                }
-            });
-        } catch (error) {
-            console.error("Error processing flash messages:", error);
+        /* Styles for price validation */
+        .invalid-input {
+            border: 1px solid #f23645 !important;
+            background-color: rgba(242, 54, 69, 0.1) !important;
         }
 
-        // Đóng modal khi click X hoặc click ngoài
-        document.querySelectorAll('.modal .close').forEach(btn => {
-            btn.onclick = () => {
-                document.getElementById(btn.dataset.target).style.display = 'none';
-            };
-        });
-        window.onclick = (e) => {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        };
-    });
-</script>
+        .price-warning {
+            color: #f23645;
+            font-size: 0.8em;
+            margin-top: 4px;
+            display: none;
+        }
+    </style>
+</head>
 
 <body>
     <div class="app">
         <aside class="sidebar">
             <div class="logo">UIT Pinance</div>
             <nav>
-                <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
                 <a href="{{ url_for('watchlist') }}">Watchlist</a>
                 <a href="{{ url_for('markets')}}">Markets</a>
                 <a href="{{ url_for('pending_orders')}}">Orders</a>
@@ -150,6 +157,7 @@
                 <div class="modal-content success-content">
                     <div class="modal-header">
                         <h3>Thành công ✓</h3>
+                        <span class="close" data-target="successModal">&times;</span>
                     </div>
                     <div class="modal-body">
                         <p id="modalSuccessMessage"></p>
@@ -165,6 +173,7 @@
                 <div class="modal-content error-content">
                     <div class="modal-header">
                         <h3>Lỗi ⚠</h3>
+                        <span class="close" data-target="errorModal">&times;</span>
                     </div>
                     <div class="modal-body">
                         <p id="modalErrorMessage"></p>
@@ -174,6 +183,23 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Price Validation Modal -->
+            <div id="priceAlertModal" class="modal">
+                <div class="modal-content error-content">
+                    <div class="modal-header">
+                        <h3>Cảnh báo giá</h3>
+                        <span class="close" data-target="priceAlertModal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <p id="priceAlertMessage"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" onclick="document.getElementById('priceAlertModal').style.display='none'">Đóng</button>
+                    </div>
+                </div>
+            </div>
+
             <header class="topbar">
                 <div class="breadcrumbs">
                     {{ stock.ticker_symbol }}
@@ -240,20 +266,20 @@
                 </section>
                 <section class="summary-cards">
                     <div class="card">
-                        <h3>Current Price</h3>
-                        <p>{{ "{:,.2f}".format(latest.current_price) }}$</p>
+                        <h3>Giá TC</h3>
+                        <p>{% if price_info and price_info.reference_price %}{{ "{:,.2f}".format(price_info.reference_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Bid</h3>
-                        <p>{{ "{:,.2f}".format(latest.bid_price) }}$</p>
+                        <h3>Giá Trần</h3>
+                        <p>{% if price_info and price_info.ceiling_price %}{{ "{:,.2f}".format(price_info.ceiling_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Ask</h3>
-                        <p>{{ "{:,.2f}".format(latest.ask_price) }}$</p>
+                        <h3>Giá Sàn</h3>
+                        <p>{% if price_info and price_info.floor_price %}{{ "{:,.2f}".format(price_info.floor_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Volume</h3>
-                        <p>{{ latest.volume }}</p>
+                        <h3>Giá hiện tại</h3>
+                        <p>{% if latest and latest.current_price %}{{ "{:,.2f}".format(latest.current_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                 </section>
 
@@ -325,40 +351,85 @@
             </div>
 
         </div>
-        <form method="POST" action="{{ url_for('order_entry', stock_id=stock.stock_id) }}" class="order-panel modern"
-            style="display: flex; right:  100px;">
+        <!-- Updated Order Form with Price Validation -->
+        <form method="POST" action="{{ url_for('order_entry', stock_id=request.view_args.stock_id) }}" 
+              class="order-panel modern" id="orderForm" style="display: flex; right: 100px;">
             <header class="order-panel-header">
                 <h2>Place Order: {{ stock.ticker_symbol }}</h2>
             </header>
+            
             <div class="order-panel-header">
                 <div class="leverage-toggle">
-                    <button type="button" class="btn-toggle" data-leverage="cross">Cross</button>
-                    <button type="button" class="btn-toggle active" data-leverage="20">20x</button>
+                    <button type="button" class="btn-toggle" data-leverage="cross" onclick="setLeverage('cross')">Cross</button>
+                    <button type="button" class="btn-toggle active" data-leverage="20" onclick="setLeverage('20')">20x</button>
                 </div>
                 <button type="button" class="btn-bonus">Grid Trading</button>
             </div>
+            
             <div class="modern-tabs">
-                <button type="button" class="tab active" data-type="limit">Limit</button>
-                <button type="button" class="tab" data-type="market">Market</button>
-                <button type="button" class="tab" data-type="trailing">Trailing Stop</button>
+                <button type="button" class="tab active" data-type="limit" onclick="setOrderType('limit')">Limit</button>
+                <button type="button" class="tab" data-type="market" onclick="setOrderType('market')">Market</button>
+                <button type="button" class="tab" data-type="trailing" onclick="setOrderType('trailing')">Trailing Stop</button>
             </div>
+            
+            {% if price_info %}
+            <div class="price-limits-info">
+                <div class="price-limit ceiling">
+                    <span>Giá trần:</span>
+                    <strong>{{ "{:,.2f}".format(price_info.ceiling_price) }}</strong>
+                </div>
+                <div class="price-limit reference">
+                    <span>Giá TC:</span>
+                    <strong>{{ "{:,.2f}".format(price_info.reference_price) }}</strong>
+                </div>
+                <div class="price-limit floor">
+                    <span>Giá sàn:</span>
+                    <strong>{{ "{:,.2f}".format(price_info.floor_price) }}</strong>
+                </div>
+            </div>
+            {% endif %}
+            
             <div class="modern-form">
                 <div class="input-row">
                     <div class="input-box">
                         <label style="padding: 5px;">Price (USDT)</label>
-                        <input name="price" type="number" step="0.01" placeholder="0.00" required />
+                        <input name="price" id="priceInput" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+                        <div id="priceWarning" class="price-warning"></div>
+                        
+                        <!-- Hidden inputs for price validation -->
+                        {% if price_info %}
+                        <input type="hidden" id="ceilingPrice" value="{{ price_info.ceiling_price }}">
+                        <input type="hidden" id="floorPrice" value="{{ price_info.floor_price }}">
+                        {% endif %}
                     </div>
-
                 </div>
+                
                 <div class="input-row">
                     <div class="input-box">
-                        <label style="padding: 5px;">Size </label>
-                        <input name="size" type="number" step="0.01" placeholder="0.00" required />
+                        <label style="padding: 5px;">Size</label>
+                        <input name="size" id="sizeInput" type="number" step="1" min="1" placeholder="0" required />
                     </div>
                 </div>
+                
+                <div class="input-row">
+                    <div class="input-box">
+                        <label style="padding: 5px;">Total Cost</label>
+                        <div class="total-cost" id="totalCost">0.00 USDT</div>
+                    </div>
+                </div>
+                
+                {% if accounts %}
+                <div class="input-row">
+                    <div class="input-box">
+                        <label style="padding: 5px;">Balance</label>
+                        <div class="account-balance">{{ "{:,.2f}".format(accounts[0].balance) }} USDT</div>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <input type="hidden" name="order_type" value="limit" id="orderTypeInput" />
                 <input type="hidden" name="leverage" value="20" id="leverageInput" />
-                <div class="modern-slider"></div>
+                
                 <div class="modern-buttons" style="padding: 5px;">
                     <button type="submit" name="side" value="buy" class="btn buy modern-buy">Buy / Long</button>
                     <button type="submit" name="side" value="sell" class="btn sell modern-sell">Sell / Short</button>
@@ -368,43 +439,250 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý flash messages
+            try {
+                const flashedRaw = '{{ get_flashed_messages(with_categories=true) | tojson | safe }}';
+                console.log("Raw flash data:", flashedRaw);
+                const flashed = JSON.parse(flashedRaw);
+                console.log("Parsed flash messages:", flashed);
+                
+                if (flashed && flashed.length) {
+                    flashed.forEach(([category, msg]) => {
+                        let modalId, msgElemId;
+                        if (category === 'success') {
+                            modalId = 'successModal';
+                            msgElemId = 'modalSuccessMessage';
+                        } else if (category === 'error') {
+                            modalId = 'errorModal';
+                            msgElemId = 'modalErrorMessage';
+                        } else {
+                            return;
+                        }
+
+                        const modal = document.getElementById(modalId);
+                        if (modal && document.getElementById(msgElemId)) {
+                            document.getElementById(msgElemId).innerText = msg;
+                            modal.style.display = 'block';
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error processing flash messages:", error);
+            }
+
+            // Đóng modal khi click X hoặc click ngoài
+            document.querySelectorAll('.modal .close').forEach(btn => {
+                btn.onclick = () => {
+                    document.getElementById(btn.dataset.target).style.display = 'none';
+                };
+            });
+            
+            window.onclick = (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            };
+            
+            // Khởi tạo giá trị mặc định cho form
+            initializeOrderForm();
+        });
+
         // Toggle profile dropdown
         function toggleProfileDropdown() {
             document.getElementById('profileDropdown').classList.toggle('show');
         }
 
-        // Close dropdown when clicking outside
+        // Đóng dropdown khi click outside
         window.onclick = function (event) {
             if (!event.target.matches('.avatar')) {
                 document.querySelectorAll('.dropdown-content.show').forEach(c => c.classList.remove('show'));
             }
+            if (event.target.classList.contains('modal')) {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
         };
 
-        // Initialize Chart.js
-        const labels = JSON.parse('{{ series | reverse | map(attribute="timestamp") | list | tojson | safe }}');
-        const data = JSON.parse('{{ series | reverse | map(attribute="current_price") | list | tojson | safe }}');
-        const ctx = document.getElementById('priceChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: '24h Price',
-                    data,
-                    fill: true,
-                    tension: 0.1
-                }]
-            }
-        });
-
-        // TP/SL toggle logic
-        const tpCheckbox = document.getElementById('tpCheckbox');
-        const dualInputs = document.querySelector('.dual-inputs');
-        if (tpCheckbox && dualInputs) {
-            tpCheckbox.addEventListener('change', () => {
-                dualInputs.style.display = tpCheckbox.checked ? 'flex' : 'none';
+        // Hàm thiết lập loại lệnh
+        function setOrderType(type) {
+            document.getElementById('orderTypeInput').value = type;
+            
+            // Cập nhật trạng thái active của các tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.type === type) {
+                    tab.classList.add('active');
+                }
             });
-            dualInputs.style.display = 'none'; // Initialize hidden
+            
+            // Ẩn/hiện trường price nếu là market order
+            const priceInput = document.getElementById('priceInput');
+            if (type === 'market') {
+                priceInput.value = "{{ latest.current_price }}";
+                priceInput.readOnly = true;
+                priceInput.style.opacity = "0.7";
+            } else {
+                priceInput.readOnly = false;
+                priceInput.style.opacity = "1";
+            }
+            
+            calculateTotal();
+        }
+
+        // Hàm thiết lập đòn bẩy
+        function setLeverage(leverage) {
+            document.getElementById('leverageInput').value = leverage;
+            
+            // Cập nhật trạng thái active
+            document.querySelectorAll('.btn-toggle').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.leverage === leverage) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // Tính tổng chi phí khi thay đổi giá hoặc số lượng
+        function calculateTotal() {
+            const price = parseFloat(document.getElementById('priceInput').value) || 0;
+            const size = parseFloat(document.getElementById('sizeInput').value) || 0;
+            const total = price * size;
+            document.getElementById('totalCost').innerText = total.toLocaleString('en-US', {
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            }) + " USDT";
+        }
+        
+        // Hiển thị modal thông báo giá trần/sàn
+        function showPriceAlert(message) {
+            const modal = document.getElementById('priceAlertModal');
+            const modalMessage = document.getElementById('priceAlertMessage');
+            
+            modalMessage.textContent = message;
+            modal.style.display = 'block';
+        }
+        
+        // Kiểm tra giá trần/sàn khi nhập liệu
+        function validatePriceLimit() {
+            const priceInput = document.getElementById('priceInput');
+            const priceWarning = document.getElementById('priceWarning');
+            const ceilingPrice = document.getElementById('ceilingPrice');
+            const floorPrice = document.getElementById('floorPrice');
+            
+            // Reset validation state
+            priceInput.classList.remove('invalid-input');
+            priceWarning.style.display = 'none';
+            
+            if (!ceilingPrice || !floorPrice) return true; // No price limits available
+            
+            const price = parseFloat(priceInput.value);
+            const ceiling = parseFloat(ceilingPrice.value);
+            const floor = parseFloat(floorPrice.value);
+            
+            if (isNaN(price)) return true; // No price entered yet
+            
+            if (price > ceiling) {
+                priceInput.classList.add('invalid-input');
+                priceWarning.textContent = `Giá vượt quá giá trần (${ceiling.toFixed(2)})`;
+                priceWarning.style.display = 'block';
+                showPriceAlert(`Giá đặt (${price.toFixed(2)}) vượt quá giá trần (${ceiling.toFixed(2)})`);
+                return false;
+            } else if (price < floor) {
+                priceInput.classList.add('invalid-input');
+                priceWarning.textContent = `Giá thấp hơn giá sàn (${floor.toFixed(2)})`;
+                priceWarning.style.display = 'block';
+                showPriceAlert(`Giá đặt (${price.toFixed(2)}) thấp hơn giá sàn (${floor.toFixed(2)})`);
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Khởi tạo form đặt lệnh
+        function initializeOrderForm() {
+            const priceInput = document.getElementById('priceInput');
+            const sizeInput = document.getElementById('sizeInput');
+            const orderForm = document.getElementById('orderForm');
+            
+            // Đặt giá mặc định là giá hiện tại
+            const currentPrice = {{ latest.current_price|default(0) }};
+            if (currentPrice > 0) {
+                priceInput.value = currentPrice;
+            }
+            
+            // Theo dõi thay đổi giá và số lượng
+            priceInput.addEventListener('input', function() {
+                validatePriceLimit();
+                calculateTotal();
+            });
+            
+            sizeInput.addEventListener('input', calculateTotal);
+            
+            // Validate form trước khi submit
+            orderForm.addEventListener('submit', function(e) {
+                if (!validatePriceLimit()) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Validate size
+                const size = parseFloat(sizeInput.value);
+                if (isNaN(size) || size <= 0) {
+                    showPriceAlert('Vui lòng nhập số lượng hợp lệ');
+                    e.preventDefault();
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Tính tổng ban đầu
+            calculateTotal();
+        }
+
+        // Initialize Chart.js
+        try {
+            const labelsString = '{{ series | reverse | map(attribute="timestamp") | list | tojson | safe }}';
+            const dataString = '{{ series | reverse | map(attribute="current_price") | list | tojson | safe }}';
+            
+            if (labelsString && dataString) {
+                const labels = JSON.parse(labelsString);
+                const data = JSON.parse(dataString);
+                
+                if (labels.length > 0 && data.length > 0) {
+                    const ctx = document.getElementById('priceChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: '24h Price',
+                                data,
+                                fill: true,
+                                tension: 0.1,
+                                borderColor: '#22ab94',
+                                backgroundColor: 'rgba(34, 171, 148, 0.1)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: false
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.log('No data points available for chart');
+                    document.getElementById('priceChart').style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error initializing chart:', error);
+            document.getElementById('priceChart').style.display = 'none';
         }
     </script>
 </body>
