@@ -181,9 +181,6 @@ def watchlist():
 def deposit():
     if not session.get('user_id'):
         return redirect(url_for('login'))
-    
-    flash('Tính năng hiện không khả dụng', 'error')
-    return redirect(url_for('dashboard'))
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user cho dropdown
@@ -215,8 +212,6 @@ def withdraw():
     if not session.get('user_id'):
         return redirect(url_for('login'))
     
-    flash('Tính năng hiện không khả dụng', 'error')
-    return redirect(url_for('dashboard'))
     conn = get_conn()
     cur = conn.cursor(cursor_factory=extras.DictCursor)
     # Lấy thông tin user cho dropdown
@@ -433,7 +428,20 @@ def order_entry(stock_id):
         """, (stock_id,)
     )
     company = cur.fetchone()
-    
+
+    # Lấy thông tin công ty từ bảng company_indicators
+    cur.execute(
+        """
+        SELECT ci.*
+        FROM company_indicators ci
+        JOIN stocks s ON ci.company_id = s.company_id
+        WHERE s.stock_id = %s
+        ORDER BY ci.report_date DESC
+        LIMIT 1;
+        """, (stock_id,)
+    )
+    company_indicators = cur.fetchone()
+
     # Lấy thông tin giá tham chiếu, giá trần, giá sàn mới nhất
     cur.execute(
         """
@@ -581,8 +589,8 @@ def order_entry(stock_id):
                           company=company,
                           top_buy_orders=top_buy_orders,
                           top_sell_orders=top_sell_orders,
-                          price_info=price_info)
-
+                          price_info=price_info,
+                          company_indicators=company_indicators)
 
 @app.route('/transactions')
 def transactions():
