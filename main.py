@@ -1158,7 +1158,7 @@ def api_stocks():
           s.status,
           s.issue_date,
           r.timestamp,
-          r.current_price,
+          r.current_price
         FROM stocks s
         LEFT JOIN real_time_price r
           ON s.stock_id = r.stock_id
