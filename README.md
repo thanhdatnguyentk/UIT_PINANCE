@@ -107,7 +107,7 @@ Hoặc bạn có thể cấu hình trực tiếp trong hàm `get_conn()` của `
 ## Chạy ứng dụng
 
 ```bash
-export FLASK_APP=app.py
+export FLASK_APP=main.py
 export FLASK_ENV=development
 flask run
 ```
