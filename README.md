@@ -14,6 +14,7 @@ Demo web cho đồ án Quản lý thông tin của tôi.
 * [Cấu trúc dự án](#cấu-trúc-dự-án)
 * [Hướng dẫn sử dụng](#hướng-dẫn-sử-dụng)
 * [Báo cáo](#báo-cáo)
+* [Hướng dẫn vào trang admin](#Hướng-dẫn-vào-trang-admin)
 
 ## Tính năng
 
@@ -168,3 +169,6 @@ pinance/
   * Danh mục hiện tại theo tài khoản
   * Lịch sử dòng tiền vào/ra
   * Lịch sử số dư theo thời gian
+## Hướng dẫn vào trang admin
+* Hãy vào trang admin bằng tài khoản có id là 1001.
+* Hoặc tại app/admin.py dòng 25 hãy chỉnh thành id bạn muốn
