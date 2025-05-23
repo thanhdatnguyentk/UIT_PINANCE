@@ -17,3 +17,5 @@ new/
 
 # System files
 .DS_Store
+
+.env

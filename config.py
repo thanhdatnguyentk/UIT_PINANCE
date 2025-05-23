@@ -1,5 +1,8 @@
 import os
+from dotenv import load_dotenv
 
+# Tải biến môi trường từ file .env
+load_dotenv()
 class Config:
     # Secret key cho Flask (đổi thành chuỗi đủ mạnh trên production)
     SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
