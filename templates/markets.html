@@ -159,7 +159,7 @@
               type="text"
               name="query"
               class="search-input"
-              placeholder="Nhập mã hoặc tên công ty..."
+              placeholder="Search symbol or company name..."
               required
             />
            <button type="submit" class="search-button">🔍</button>
@@ -191,49 +191,49 @@
 
       <section class="summary-cards">
         <div class="card">
-          <h3>Tổng số cổ phiếu</h3>
+          <h3>Total stock</h3>
           <p>{{ market_data|length }}</p>
         </div>
         <div class="card">
           <h3>Market Status</h3>
-          <p>Mở cửa</p>
+          <p>Open</p>
         </div>
       </section>
       
       <!-- Search box for filtering the market table -->
       <div class="searchbox">
-        <input type="text" id="marketSearch" onkeyup="filterMarketTable()" placeholder="Tìm mã cổ phiếu...">
+        <input type="text" id="marketSearch" onkeyup="filterMarketTable()" placeholder="Search Symbol...">
       </div>
 
       <section class="accounts-table">
-        <h2>Bảng giá thị trường</h2>
+        <h2>Price board</h2>
         <div class="market-container">
           <div class="scrollable-container">
             <table class="market-table" id="marketTable">
               <thead>
                 <tr>
-                  <th rowspan="2">CK</th>
-                  <th rowspan="2">Trần</th>
-                  <th rowspan="2">Sàn</th>
-                  <th rowspan="2">TC</th>
-                  <th colspan="6" class="group-header">Bên mua</th>
-                  <th colspan="6" class="group-header">Bên bán</th>
-                  <th rowspan="2">Tổng KL</th>
-                  <th rowspan="2">Cao</th>
-                  <th rowspan="2">Thấp</th>
+                  <th rowspan="2">Symbol</th>
+                  <th rowspan="2">Ceil</th>
+                  <th rowspan="2">Floor</th>
+                  <th rowspan="2">Ref</th>
+                  <th colspan="6" class="group-header">Bid</th>
+                  <th colspan="6" class="group-header">Ask</th>
+                  <th rowspan="2">Total Vol</th>
+                  <th rowspan="2">High</th>
+                  <th rowspan="2">Low</th>
                 </tr>
                 <tr>
-                  <th class="buy-price">Giá 3</th>
+                  <th class="buy-price">P3</th>
                   <th>KL 3</th>
-                  <th class="buy-price">Giá 2</th>
+                  <th class="buy-price">P2</th>
                   <th>KL 2</th>
-                  <th class="buy-price">Giá 1</th>
+                  <th class="buy-price">P1</th>
                   <th>KL 1</th>
-                  <th class="sell-price">Giá 1</th>
+                  <th class="sell-price">P1</th>
                   <th>KL 1</th>
-                  <th class="sell-price">Giá 2</th>
+                  <th class="sell-price">P2</th>
                   <th>KL 2</th>
-                  <th class="sell-price">Giá 3</th>
+                  <th class="sell-price">P3</th>
                   <th>KL 3</th>
                 </tr>
               </thead>
