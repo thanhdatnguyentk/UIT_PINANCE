@@ -199,19 +199,6 @@
                 flex-direction: column;
             }
         }
-
-        /* Styles for price validation */
-        .invalid-input {
-            border: 1px solid #f23645 !important;
-            background-color: rgba(242, 54, 69, 0.1) !important;
-        }
-
-        .price-warning {
-            color: #f23645;
-            font-size: 0.8em;
-            margin-top: 4px;
-            display: none;
-        }
     </style>
 </head>
 
@@ -266,14 +253,14 @@
             <div id="priceAlertModal" class="modal">
                 <div class="modal-content error-content">
                     <div class="modal-header">
-                        <h3>Cảnh báo giá</h3>
+                        <h3>Price Alert</h3>
                         <span class="close" data-target="priceAlertModal">&times;</span>
                     </div>
                     <div class="modal-body">
                         <p id="priceAlertMessage"></p>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn" onclick="document.getElementById('priceAlertModal').style.display='none'">Đóng</button>
+                        <button class="btn" onclick="document.getElementById('priceAlertModal').style.display='none'">Close</button>
                     </div>
                 </div>
             </div>
@@ -285,7 +272,7 @@
                 <div class="topbar-search">
                     <!-- Unified search: tìm theo ticker hoặc tên công ty -->
                     <form action="{{ url_for('company_search') }}" method="get" class="search-form">
-                        <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..."
+                        <input type="text" name="query" class="search-input" placeholder="Enter company code or name..."
                             required />
                         <button type="submit" class="search-button">🔍</button>
                     </form>
@@ -304,12 +291,12 @@
                                     <p class="email">{{ user_email }}</p>
                                 </div>
                             </div>
-                            <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                            <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                            <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-                            <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-                            <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-                            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                            <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                            <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+                            <a href="{{ url_for('transactions') }}">Transaction History</a>
+                            <a href="{{ url_for('deposit') }}">Deposit</a>
+                            <a href="{{ url_for('withdraw') }}">Withdraw</a>
+                            <a href="{{ url_for('logout') }}">Logout</a>
                         </div>
                     </div>
                 </div>
@@ -344,19 +331,19 @@
                 </section>
                 <section class="summary-cards">
                     <div class="card">
-                        <h3>Giá TC</h3>
+                        <h3>Ref</h3>
                         <p>{% if price_info and price_info.reference_price %}{{ "{:,.2f}".format(price_info.reference_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Giá Trần</h3>
+                        <h3>Ceil</h3>
                         <p>{% if price_info and price_info.ceiling_price %}{{ "{:,.2f}".format(price_info.ceiling_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Giá Sàn</h3>
+                        <h3>Floor</h3>
                         <p>{% if price_info and price_info.floor_price %}{{ "{:,.2f}".format(price_info.floor_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                     <div class="card">
-                        <h3>Giá hiện tại</h3>
+                        <h3>Price</h3>
                         <p>{% if latest and latest.current_price %}{{ "{:,.2f}".format(latest.current_price) }}${% else %}N/A{% endif %}</p>
                     </div>
                 </section>
@@ -447,19 +434,19 @@
                             <span class="indicator-value">{{ "{:,.2f}".format(company_indicators.beta) if company_indicators.beta else 'N/A' }}</span>
                         </div>
                         <div class="indicator-box">
-                            <span class="indicator-label">Vốn hóa</span>
+                            <span class="indicator-label">Market Cap</span>
                             <span class="indicator-value">{{ "{:,.0f}".format(company_indicators.market_cap) if company_indicators.market_cap else 'N/A' }}</span>
                         </div>
                         <div class="indicator-box">
-                            <span class="indicator-label">Giá trị sổ sách</span>
+                            <span class="indicator-label">Book Value</span>
                             <span class="indicator-value">{{ "{:,.2f}".format(company_indicators.book_value) if company_indicators.book_value else 'N/A' }}</span>
                         </div>
                     </div>
                     <div class="indicator-date">
-                        Báo cáo ngày: {{ company_indicators.report_date }}
+                        Report Date: {{ company_indicators.report_date }}
                     </div>
                     {% else %}
-                    <div class="no-data">Không có dữ liệu chỉ số công ty</div>
+                    <div class="no-data">No company indicator data available</div>
                     {% endif %}
                 </div>
             </div>
@@ -489,15 +476,15 @@
             {% if price_info %}
             <div class="price-limits-info">
                 <div class="price-limit ceiling">
-                    <span>Giá trần:</span>
+                    <span>Ceil:</span>
                     <strong>{{ "{:,.2f}".format(price_info.ceiling_price) }}</strong>
                 </div>
                 <div class="price-limit reference">
-                    <span>Giá TC:</span>
+                    <span>Ref:</span>
                     <strong>{{ "{:,.2f}".format(price_info.reference_price) }}</strong>
                 </div>
                 <div class="price-limit floor">
-                    <span>Giá sàn:</span>
+                    <span>Floor:</span>
                     <strong>{{ "{:,.2f}".format(price_info.floor_price) }}</strong>
                 </div>
             </div>
@@ -508,7 +495,6 @@
                     <div class="input-box">
                         <label style="padding: 5px;">Price (USDT)</label>
                         <input name="price" id="priceInput" type="number" step="0.01" min="0.01" placeholder="0.00" required />
-                        <div id="priceWarning" class="price-warning"></div>
                         
                         <!-- Hidden inputs for price validation -->
                         {% if price_info %}
@@ -678,16 +664,11 @@
             modal.style.display = 'block';
         }
         
-        // Kiểm tra giá trần/sàn khi nhập liệu
+        // Kiểm tra giá trần/sàn khi submit form
         function validatePriceLimit() {
             const priceInput = document.getElementById('priceInput');
-            const priceWarning = document.getElementById('priceWarning');
             const ceilingPrice = document.getElementById('ceilingPrice');
             const floorPrice = document.getElementById('floorPrice');
-            
-            // Reset validation state
-            priceInput.classList.remove('invalid-input');
-            priceWarning.style.display = 'none';
             
             if (!ceilingPrice || !floorPrice) return true; // No price limits available
             
@@ -698,16 +679,10 @@
             if (isNaN(price)) return true; // No price entered yet
             
             if (price > ceiling) {
-                priceInput.classList.add('invalid-input');
-                priceWarning.textContent = `Giá vượt quá giá trần (${ceiling.toFixed(2)})`;
-                priceWarning.style.display = 'block';
-                showPriceAlert(`Giá đặt (${price.toFixed(2)}) vượt quá giá trần (${ceiling.toFixed(2)})`);
+                showPriceAlert(`Order price (${price.toFixed(2)}) exceeds ceiling price (${ceiling.toFixed(2)}). Please enter a price between ${floor.toFixed(2)} and ${ceiling.toFixed(2)}.`);
                 return false;
             } else if (price < floor) {
-                priceInput.classList.add('invalid-input');
-                priceWarning.textContent = `Giá thấp hơn giá sàn (${floor.toFixed(2)})`;
-                priceWarning.style.display = 'block';
-                showPriceAlert(`Giá đặt (${price.toFixed(2)}) thấp hơn giá sàn (${floor.toFixed(2)})`);
+                showPriceAlert(`Order price (${price.toFixed(2)}) is below floor price (${floor.toFixed(2)}). Please enter a price between ${floor.toFixed(2)} and ${ceiling.toFixed(2)}.`);
                 return false;
             }
             
@@ -726,12 +701,8 @@
                 priceInput.value = currentPrice;
             }
             
-            // Theo dõi thay đổi giá và số lượng
-            priceInput.addEventListener('input', function() {
-                validatePriceLimit();
-                calculateTotal();
-            });
-            
+            // Theo dõi thay đổi giá và số lượng (chỉ tính tổng, không validate)
+            priceInput.addEventListener('input', calculateTotal);
             sizeInput.addEventListener('input', calculateTotal);
             
             // Validate form trước khi submit

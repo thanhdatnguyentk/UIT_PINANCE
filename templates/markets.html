@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   <style>
     .market-container {
-      padding-left: 0; /* Đẩy bảng sang trái */
+      padding-left: 0; /* Push table to the left */
       margin-right: 15px;
       width: 100%;
     }
@@ -17,13 +17,13 @@
       border-collapse: collapse;
       margin-top: 20px;
       font-size: 0.9rem;
-      border: 1px solid #ddd; /* Thêm viền cho toàn bộ bảng */
+      border: 1px solid #ddd; /* Add border for entire table */
     }
 
     .market-table th, .market-table td {
       padding: 6px 4px;
       text-align: right;
-      border: 1px solid #ddd; /* Thêm viền cho mỗi ô */
+      border: 1px solid #ddd; /* Add border for each cell */
     }
 
     .market-table th {
@@ -98,7 +98,7 @@
     }
 
     .searchbox {
-      padding: 10px 10px; /* Giảm padding bên trái */
+      padding: 10px 10px; /* Reduce left padding */
       margin-bottom: 20px;
       display: flex;
       gap: 10px;
@@ -131,7 +131,7 @@
     }
 
     .accounts-table h2 {
-      margin-left: 0; /* Đẩy tiêu đề sang trái */
+      margin-left: 0; /* Push title to the left */
     }
   </style>
 </head>
@@ -153,7 +153,7 @@
       <header class="topbar">
         <div class="breadcrumbs">Markets</div>
         <div class="topbar-search">
-          <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+          <!-- Unified search: find by ticker or company name -->
           <form action="{{ url_for('company_search') }}" method="get" class="search-form">
             <input
               type="text"
@@ -178,12 +178,12 @@
                 </div>
               </div>
     
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
@@ -224,37 +224,37 @@
                 </tr>
                 <tr>
                   <th class="buy-price">P3</th>
-                  <th>KL 3</th>
+                  <th>Vol 3</th>
                   <th class="buy-price">P2</th>
-                  <th>KL 2</th>
+                  <th>Vol 2</th>
                   <th class="buy-price">P1</th>
-                  <th>KL 1</th>
+                  <th>Vol 1</th>
                   <th class="sell-price">P1</th>
-                  <th>KL 1</th>
+                  <th>Vol 1</th>
                   <th class="sell-price">P2</th>
-                  <th>KL 2</th>
+                  <th>Vol 2</th>
                   <th class="sell-price">P3</th>
-                  <th>KL 3</th>
+                  <th>Vol 3</th>
                 </tr>
               </thead>
               <tbody>
                 {% for stock in market_data %}
                 <tr>
-                  <!-- Mã cổ phiếu -->
+                  <!-- Stock Symbol -->
                   <td class="ticker-symbol">
                     <a href="{{ url_for('order_entry', stock_id=stock.stock_id) }}">{{ stock.CK }}</a>
                   </td>
                   
-                  <!-- Giá trần -->
+                  <!-- Ceiling Price -->
                   <td class="ceiling">{{ "{:,.2f}".format(stock.Trần) if stock.Trần > 0 else 'N/A' }}</td>
                   
-                  <!-- Giá sàn -->
+                  <!-- Floor Price -->
                   <td class="floor">{{ "{:,.2f}".format(stock.Sàn) if stock.Sàn > 0 else 'N/A' }}</td>
                   
-                  <!-- Giá tham chiếu -->
+                  <!-- Reference Price -->
                   <td>{{ "{:,.2f}".format(stock.TC) if stock.TC > 0 else 'N/A' }}</td>
                   
-                  <!-- Bên mua - 3 giá cao nhất (từ thấp đến cao) -->
+                  <!-- Buy side - 3 highest prices (from low to high) -->
                   <td class="buy-price">{{ "{:,.2f}".format(stock['Giá 3 Mua']) if stock['Giá 3 Mua'] > 0 else '-' }}</td>
                   <td>{{ "{:,}".format(stock['KL 3 Mua']|int) if stock['KL 3 Mua'] > 0 else '-' }}</td>
                   
@@ -264,7 +264,7 @@
                   <td class="buy-price">{{ "{:,.2f}".format(stock['Giá 1 Mua']) if stock['Giá 1 Mua'] > 0 else '-' }}</td>
                   <td>{{ "{:,}".format(stock['KL 1 Mua']|int) if stock['KL 1 Mua'] > 0 else '-' }}</td>
                   
-                  <!-- Bên bán - 3 giá thấp nhất (từ thấp đến cao) -->
+                  <!-- Sell side - 3 lowest prices (from low to high) -->
                   <td class="sell-price">{{ "{:,.2f}".format(stock['Giá 1 Bán']) if stock['Giá 1 Bán'] > 0 else '-' }}</td>
                   <td>{{ "{:,}".format(stock['KL 1 Bán']|int) if stock['KL 1 Bán'] > 0 else '-' }}</td>
                   
@@ -274,13 +274,13 @@
                   <td class="sell-price">{{ "{:,.2f}".format(stock['Giá 3 Bán']) if stock['Giá 3 Bán'] > 0 else '-' }}</td>
                   <td>{{ "{:,}".format(stock['KL 3 Bán']|int) if stock['KL 3 Bán'] > 0 else '-' }}</td>
                   
-                  <!-- Tổng khối lượng -->
+                  <!-- Total Volume -->
                   <td class="format-number">{{ "{:,}".format(stock['Tổng KL']|int) if stock['Tổng KL'] > 0 else '0' }}</td>
                   
-                  <!-- Giá cao nhất -->
+                  <!-- Highest Price -->
                   <td>{{ "{:,.2f}".format(stock.Cao) if stock.Cao > 0 else 'N/A' }}</td>
                   
-                  <!-- Giá thấp nhất -->
+                  <!-- Lowest Price -->
                   <td>{{ "{:,.2f}".format(stock.Thấp) if stock.Thấp > 0 else 'N/A' }}</td>
                 </tr>
                 {% endfor %}

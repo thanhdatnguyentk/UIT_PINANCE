@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chỉnh sửa thông tin cá nhân</title>
+  <title>Edit Personal Information</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <!-- Modal Thông Báo Chung -->
@@ -30,11 +30,11 @@
 
   <div class="main-content">
     <header class="topbar">
-        <div class="breadcrumbs">Chỉnh sửa thông tin</div>
+        <div class="breadcrumbs">Edit Profile</div>
       
         <section class="search-form-area">
             <form method="get" action="{{ url_for('company_search') }}" class="search-form">
-                <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." value="{{ query }}" />
+                <input type="text" name="query" class="search-input" placeholder="Enter ticker or company name..." value="{{ query }}" />
                 <button type="submit" class="search-button">🔍</button>
             </form>
         </section>
@@ -60,12 +60,12 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+                <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
@@ -83,20 +83,20 @@
       {% endwith %}
 
       <form method="POST" class="form-container">
-        <label>Họ:</label>
+        <label>First Name:</label>
         <input type="text" name="first_name" value="{{ user.first_name }}" required />
 
-        <label>Tên:</label>
+        <label>Last Name:</label>
         <input type="text" name="last_name" value="{{ user.last_name }}" required />
 
-        <label>Giới tính:</label>
+        <label>Gender:</label>
         <select name="gender" required>
-          <option value="Nam"   {% if user.gender=='Nam'   %}selected{% endif %}>Nam</option>
-          <option value="Nữ"    {% if user.gender=='Nữ'    %}selected{% endif %}>Nữ</option>
-          <option value="Khác"  {% if user.gender=='Khác'  %}selected{% endif %}>Khác</option>
+          <option value="Nam"   {% if user.gender=='Nam'   %}selected{% endif %}>Male</option>
+          <option value="Nữ"    {% if user.gender=='Nữ'    %}selected{% endif %}>Female</option>
+          <option value="Khác"  {% if user.gender=='Khác'  %}selected{% endif %}>Other</option>
         </select>
 
-        <label>Ngày sinh:</label>
+        <label>Date of Birth:</label>
         <input
           type="date"
           name="birthday"
@@ -113,7 +113,7 @@
           required
         />
 
-        <label>Số điện thoại:</label>
+        <label>Phone Number:</label>
         <input
           type="text"
           name="phone"
@@ -122,7 +122,7 @@
           required
         />
 
-        <label>Phương thức thanh toán:</label>
+        <label>Payment Method:</label>
         <input
           type="text"
           name="payment_method"
@@ -131,7 +131,7 @@
         />
 
         <button type="submit" class="btn btn-primary" style="margin-top:1rem;">
-          Lưu thay đổi
+          Save Changes
         </button>
       </form>
     </section>

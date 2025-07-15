@@ -43,10 +43,10 @@
     </aside>
     <div class="main-content">
       <header class="topbar">
-        <div class="breadcrumbs">Tìm kiếm công ty</div>
+        <div class="breadcrumbs">Company Search</div>
         <section class="search-form-area">
             <form method="get" action="{{ url_for('company_search') }}" class="search-form">
-                <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." value="{{ query }}" />
+                <input type="text" name="query" class="search-input" placeholder="Enter company code or name..." value="{{ query }}" />
                 <button type="submit" class="search-button">🔍</button>
             </form>
         </section>
@@ -61,12 +61,12 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
@@ -74,19 +74,19 @@
     </header>
       <section class="search-summary-cards">
         <div class="card">
-          <h3>Tổng kết quả</h3>
+          <h3>Total Results</h3>
           <p>{{ (company is not none and 1) + results|length }}</p>
         </div>
       </section>
       <section class="search-results">
         {% if company %}
         <div class="company-detail-card">
-          <h4>Chi tiết công ty {{ company.p_ticker_symbol }}</h4>
+          <h4>Company Details {{ company.p_ticker_symbol }}</h4>
           <ul>
             <li><strong>ID:</strong> {{ company.p_company_id }}</li>
-            <li><strong>Tên:</strong> {{ company.p_company_name }}</li>
-            <li><strong>Ngành:</strong> {{ company.p_industry }}</li>
-            <li><strong>Ngày niêm yết:</strong> {{ company.p_listed_date.strftime('%Y-%m-%d') }}</li>
+            <li><strong>Name:</strong> {{ company.p_company_name }}</li>
+            <li><strong>Industry:</strong> {{ company.p_industry }}</li>
+            <li><strong>Listed Date:</strong> {{ company.p_listed_date.strftime('%Y-%m-%d') }}</li>
             <li><strong>Website:</strong> <a href="{{ company.p_website }}" target="_blank">{{ company.p_website }}</a></li>
           </ul>
           <p>{{ company.p_description }}</p>
@@ -94,15 +94,15 @@
         {% endif %}
         {% if results %}
         <div class="company-list">
-          <h4>Danh sách kết quả tìm kiếm theo tên</h4>
+          <h4>Search Results by Name</h4>
           <table>
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tên công ty</th>
+                <th>Company Name</th>
                 <th>Ticker</th>
-                <th>Ngành</th>
-                <th>Ngày niêm yết</th>
+                <th>Industry</th>
+                <th>Listed Date</th>
               </tr>
             </thead>
             <tbody>

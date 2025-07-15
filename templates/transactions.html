@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lịch sử giao dịch</title>
+    <title>Transaction History</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
@@ -25,15 +25,15 @@
 
       <div class="main-content">
         <header class="topbar">
-          <div class="breadcrumbs">Lịch sử giao dịch</div>
+          <div class="breadcrumbs">Transaction History</div>
           <div class="topbar-search">
-            <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+            <!-- Unified search: find by ticker or company name -->
             <form action="{{ url_for('company_search') }}" method="get" class="search-form">
               <input
                 type="text"
                 name="query"
                 class="search-input"
-                placeholder="Nhập mã hoặc tên công ty..."
+                placeholder="Enter ticker or company name..."
                 required
               />
              <button type="submit" class="search-button">🔍</button>
@@ -63,30 +63,30 @@
                   </div>
                 </div>
       
-                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+                <a href="{{ url_for('transactions') }}">Transaction History</a>
+                <a href="{{ url_for('deposit') }}">Deposit</a>
+                <a href="{{ url_for('withdraw') }}">Withdraw</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
               </div>
             </div>
           </div>
         </header>
 
         <section class="accounts-table">
-          <h2>Lịch sử giao dịch</h2>
+          <h2>Transaction History</h2>
           <table>
             <thead>
               <tr>
-                <th>ID giao dịch</th>
-                <th>Mã</th>
-                <th>Loại</th>
-                <th>Số lượng</th>
-                <th>Giá đặt</th>
-                <th>Giá khớp</th>
-                <th>Tổng giá trị</th>
-                <th>Thời gian</th>
+                <th>Transaction ID</th>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Order Price</th>
+                <th>Matched Price</th>
+                <th>Total Value</th>
+                <th>Time</th>
               </tr>
             </thead>
             <tbody>

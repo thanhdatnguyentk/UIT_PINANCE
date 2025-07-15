@@ -32,13 +32,13 @@
         <header class="topbar">
           <div class="breadcrumbs">Dashboard</div>
           <div class="topbar-search">
-            <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+            <!-- Unified search: find by ticker or company name -->
             <form action="{{ url_for('company_search') }}" method="get" class="search-form">
               <input
                 type="text"
                 name="query"
                 class="search-input"
-                placeholder="Nhập mã hoặc tên công ty..."
+                placeholder="Enter ticker or company name..."
                 required
               />
              <button type="submit" class="search-button">🔍</button>
@@ -68,38 +68,38 @@
                     <p class="email">{{ user_email }}</p>
                   </div>
                 </div>
-                <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-                <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-                <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-                <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+                <a href="{{ url_for('transactions') }}">Transaction History</a>
+                <a href="{{ url_for('deposit') }}">Deposit</a>
+                <a href="{{ url_for('withdraw') }}">Withdraw</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
               </div>
             </div>
           </div>
         </header>
         <section class="summary-cards">
           <div class="card">
-            <h3>Số tài khoản</h3>
+            <h3>Total account</h3>
             <p>{{ accounts|length }}</p>
           </div>
           <div class="card">
-            <h3>Giao dịch nạp</h3>
+            <h3>Deposit</h3>
             <p>{{ total_deposits }}</p>
           </div>
           <div class="card">
-            <h3>Giao dịch rút</h3>
+            <h3>Withdraw</h3>
             <p>{{ total_withdrawals }}</p>
           </div>
         </section>
         <section class="accounts-table">
-          <h2>Danh sách tài khoản</h2>
+          <h2>Account list</h2>
           <table>
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Loại</th>
-                <th>Số dư</th>
+                <th>Type</th>
+                <th>Balance</th>
               </tr>
             </thead>
             <tbody>

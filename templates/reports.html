@@ -4,8 +4,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Báo Cáo</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <title>Reports</title>
+  <link rel="stylesheet" href="{{ url_for('static', fi                <h3>Stock Transaction Report Parameters</h3>
+                <label class="form-label" for="report_date">Transaction Date:</label>
+                <input type="date" id="report_date" name="report_date" class="form-control" value="{{ report_date or '' }}" />
+                <button type="submit" class="btn btn-primary">Generate Report</button>me='css/style.css') }}"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .report-params {
@@ -175,7 +178,7 @@
     </aside>
     <div class="main-content">
       <header class="topbar">
-        <div class="breadcrumbs">Báo Cáo</div>
+        <div class="breadcrumbs">Reports</div>
         <div class="topbar-search">
           <form action="{{ url_for('company_search') }}" method="get" class="search-form">
             <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." required/>
@@ -193,12 +196,12 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
@@ -207,19 +210,19 @@
       <section class="content-section summary-cards">
         <div class="card">
           <div class="card-header">
-            <h2>Xuất Báo Cáo</h2>
+            <h2>Generate Reports</h2>
           </div>
           <div class="card-content">
             
             <form method="post" class="report-form">
               <div class="form-group">
-                <label class="form-label" for="report_type">Loại báo cáo:</label>
+                <label class="form-label" for="report_type">Report Type:</label>
                 <select id="report_type" name="report_type" class="form-select" required>
-                  <option value="" {{ 'selected' if not report_type else '' }}>-- Chọn loại báo cáo --</option>
-                  <option value="stock_transactions" {{ 'selected' if report_type == 'stock_transactions' else '' }}>Báo cáo giao dịch cổ phiếu</option>
-                  <option value="stock_holdings" {{ 'selected' if report_type == 'stock_holdings' else '' }}>Báo cáo số lượng cổ phiếu đang có</option>
-                  <option value="money_transactions" {{ 'selected' if report_type == 'money_transactions' else '' }}>Báo cáo lịch sử nạp/rút tiền</option>
-                  <option value="balance_history" {{ 'selected' if report_type == 'balance_history' else '' }}>Báo cáo biến động số dư</option>
+                  <option value="" {{ 'selected' if not report_type else '' }}>-- Select Report Type --</option>
+                  <option value="stock_transactions" {{ 'selected' if report_type == 'stock_transactions' else '' }}>Stock Transaction Report</option>
+                  <option value="stock_holdings" {{ 'selected' if report_type == 'stock_holdings' else '' }}>Stock Holdings Report</option>
+                  <option value="money_transactions" {{ 'selected' if report_type == 'money_transactions' else '' }}>Deposit/Withdrawal History Report</option>
+                  <option value="balance_history" {{ 'selected' if report_type == 'balance_history' else '' }}>Balance History Report</option>
                 </select>
               </div>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng ký</title>
+  <title>Register</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="landing">
     <div class="container landing-content" style="align-items: flex-start;">
       <div class="text-block">
-        <h1>Đăng ký tài khoản</n**>
-        <p>Chào mừng! Hãy điền thông tin bên dưới để bắt đầu.</p>
+        <h1>Create your Account</n**>
+        <p>Welcome!</p>
       </div>
       <div class="form-block" style="flex:1; max-width:400px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -36,29 +36,29 @@
           {% endif %}
         {% endwith %}
         <form action="" method="POST" class="form-container">
-          <label>Họ:</label>
+          <label>First name:</label>
           <input type="text" name="first_name" required />
-          <label>Tên:</label>
+          <label>Last name:</label>
           <input type="text" name="last_name" required />
-          <label>Giới tính:</label>
+          <label>Sex:</label>
           <select name="gender" required>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
+            <option value="Nam">Male</option>
+            <option value="Nữ">Female</option>
+            <option value="Khác">Other</option>
           </select>
-          <label>Ngày sinh:</label>
+          <label>Date of Birth:</label>
           <input type="date" name="birthday" required max="{{ max_date }}" />
           <label>Email:</label>
           <input type="email" name="email" required />
           <label>Phone:</label>
           <input type="text" name="phone" required pattern="\d{10}" />
-          <label>Phương thức thanh toán:</label>
+          <label>Payment Method:</label>
           <input type="text" name="payment_method" required />
           <label>Password:</label>
           <input type="password" name="password" required minlength="6" />
           <label>Confirm Password:</label>
           <input type="password" name="confirm_password" required minlength="6" />
-          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Đăng ký</button>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Sign up</button>
         </form>
       </div>
     </div>

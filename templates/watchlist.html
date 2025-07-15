@@ -25,13 +25,13 @@
     <header class="topbar">
       <div class="breadcrumbs">Watchlist</div>
       <div class="topbar-search">
-        <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+        <!-- Unified search: find by ticker or company name -->
         <form action="{{ url_for('company_search') }}" method="get" class="search-form">
           <input
             type="text"
             name="query"
             class="search-input"
-            placeholder="Nhập mã hoặc tên công ty..."
+            placeholder="Enter ticker or company name..."
             required
           />
          <button type="submit" class="search-button">🔍</button>
@@ -50,26 +50,26 @@
               </div>
             </div>
   
-            <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-            <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-            <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-            <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-            <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+            <a href="{{ url_for('edit_profile') }}">Profile</a>
+            <a href="{{ url_for('asset_distribution') }}">Asset Allocation</a>
+            <a href="{{ url_for('transactions') }}">Transactions</a>
+            <a href="{{ url_for('deposit') }}">Deposit</a>
+            <a href="{{ url_for('withdraw') }}">Withdraw</a>
+            <a href="{{ url_for('logout') }}">Log out</a>
           </div>
         </div>
     </header>
     <section class="accounts-table">
-      <h2>Danh sách cổ phiếu đang nắm giữ</h2>
+      <h2>Your watchlist</h2>
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>Mã</th>
-            <th>Công ty</th>
-            <th>Số lượng</th>
+            <th>Symbol</th>
+            <th>Company</th>
+            <th>Quantity</th>
             <!-- <th>Giá trung bình</th> -->
-            <th>Ngày</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>

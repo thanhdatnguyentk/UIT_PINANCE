@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trợ giúp</title>
+  <title>Help</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
 </head>
 <body>
@@ -21,7 +21,7 @@
     </aside>
     <div class="main-content">
       <header class="topbar">
-        <div class="breadcrumbs">Trợ giúp</div>
+        <div class="breadcrumbs">Help</div>
         
         <div class="topbar-right">
           <div class="profile-menu">
@@ -34,20 +34,20 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
       </header>
       <section class="help-content" style="padding:2rem; background:#fff; border-radius:8px;">
-        <h1>Trung tâm trợ giúp</h1>
+        <h1>Help Center</h1>
         <div class="help-video">
-       <h2>Video hướng dẫn sử dụng</h2>
+       <h2>User Guide Video</h2>
        <div class="video-container">
 
          <video controls style="max-width:100%; height:auto;">
@@ -57,47 +57,47 @@
        </div>
      </div>
 
-        <p>Chào mừng bạn đến với trang trợ giúp. Dưới đây là hướng dẫn chi tiết các bước sử dụng chính và giải đáp các câu hỏi thường gặp.</p>
-        <h2>Hướng dẫn chi tiết các tính năng</h2>
+        <p>Welcome to the help page. Below is a detailed guide on main usage steps and answers to frequently asked questions.</p>
+        <h2>Detailed Feature Guide</h2>
         <ol>
-          <li><strong>Đăng ký & Đăng nhập:</strong>
+          <li><strong>Registration & Login:</strong>
             <ul>
-              <li>Truy cập <em>/register</em> để tạo tài khoản.</li>
-              <li>Điền đầy đủ thông tin và bấm "Đăng ký".</li>
-              <li>Đăng nhập tại <em>/login</em> với email và mật khẩu.</li>
+              <li>Access <em>/register</em> to create an account.</li>
+              <li>Fill in complete information and click "Register".</li>
+              <li>Login at <em>/login</em> with email and password.</li>
             </ul>
           </li>
-          <li><strong>Bảng điều khiển (Dashboard):</strong>
+          <li><strong>Dashboard:</strong>
             <ul>
-              <li>Xem tổng quan tài khoản, số dư và giao dịch.</li>
+              <li>View account overview, balance and transactions.</li>
             </ul>
           </li>
-          <li><strong>Thị trường (Markets):</strong>
+          <li><strong>Markets:</strong>
             <ul>
-              <li>Xem giá, khối lượng và biểu đồ lịch sử giá.</li>
+              <li>View prices, volume and historical price charts.</li>
             </ul>
           </li>
-          <li><strong>Đặt lệnh (Orders):</strong>
+          <li><strong>Orders:</strong>
             <ul>
-              <li>Chọn BUY/SELL, nhập giá, khối lượng, TP/SL (nếu cần), bấm "Đặt lệnh".</li>
+              <li>Choose BUY/SELL, enter price, volume, TP/SL (if needed), click "Place Order".</li>
             </ul>
           </li>
           <li><strong>Watchlist:</strong>
             <ul>
-              <li>Tự động hiển thị các cổ phiếu bạn đã mua.</li>
+              <li>Automatically displays stocks you have purchased.</li>
             </ul>
           </li>
-          <li><strong>Lịch sử giao dịch:</strong>
+          <li><strong>Transaction History:</strong>
             <ul>
-              <li>Xem các giao dịch đã thực hiện.</li>
+              <li>View completed transactions.</li>
             </ul>
           </li>
-          <li><strong>Nạp/Rút tiền:</strong>
+          <li><strong>Deposit/Withdraw:</strong>
             <ul>
-              <li>Chọn tài khoản, nhập số tiền và xác nhận.</li>
+              <li>Select account, enter amount and confirm.</li>
             </ul>
           </li>
-          <li><strong>Hồ sơ cá nhân:</strong>
+          <li><strong>Personal Profile:</strong>
             <ul>
               <li>Cập nhật thông tin cá nhân và mật khẩu.</li>
             </ul>

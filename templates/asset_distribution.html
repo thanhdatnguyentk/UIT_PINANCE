@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Phân bố tài sản</title>
+    <title>Asset Distribution</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -109,7 +109,7 @@
         <div class="main-content">
             <!-- Topbar -->
             <header class="topbar">
-                <div class="breadcrumbs">Phân bố tài sản</div>
+                <div class="breadcrumbs"> Asset Allocation</div>
                 <div class="topbar-right">
                     <div class="profile-menu">
                         <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="Avatar" class="avatar"
@@ -123,12 +123,12 @@
                                     <p class="email">{{ user_email }}</p>
                                 </div>
                             </div>
-                            <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-                            <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-                            <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-                            <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-                            <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-                            <a href="{{ url_for('logout') }}">Đăng xuất</a>
+                            <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+                            <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+                            <a href="{{ url_for('transactions') }}">Transaction History</a>
+                            <a href="{{ url_for('deposit') }}">Deposit</a>
+                            <a href="{{ url_for('withdraw') }}">Withdraw</a>
+                            <a href="{{ url_for('logout') }}">Logout</a>
                         </div>
                     </div>
                 </div>
@@ -137,17 +137,17 @@
             <!-- Asset Distribution Section -->
             <section class="summary-cards">
                 <div class="card">
-                    <h2 class="section-title">Tổng quan phân bố tài sản</h2>
+                    <h2 class="section-title">Asset Allocation Overview</h2>
                     <div class="container-flex">
                         <!-- Left Table: Asset Distribution -->
                         <div class="table-section">
-                            <h3>Chi tiết phân bổ tài sản</h3>
+                            <h3>Asset Allocation Details</h3>
                             <table class="summary-table">
                                 <thead>
                                     <tr>
-                                        <th>Loại tài sản</th>
-                                        <th>Giá trị ($)</th>
-                                        <th>Phân bổ (%)</th>
+                                        <th>Asset Type</th>
+                                        <th>Value ($)</th>
+                                        <th>Allocation (%)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -159,7 +159,7 @@
                                     </tr>
                                     {% endfor %}
                                     <tr style="font-weight: bold; background-color: #eee;">
-                                        <td>Tổng tài sản</td>
+                                        <td>Total Assets</td>
                                         <td class="currency-value">{{ "{:,.2f}".format(total_assets) }}</td>
                                         <td class="percentage-value">100.00</td>
                                     </tr>
@@ -174,15 +174,15 @@
                         
                         <!-- Right Table: Profit Information -->
                         <div class="table-section">
-                            <h3>Lợi nhuận theo cổ phiếu</h3>
+                            <h3>Earnings Per Share (EPS)</h3>
                             <table class="summary-table">
                                 <thead>
                                     <tr>
-                                        <th>Mã CP</th>
-                                        <th>Giá vốn TB</th>
-                                        <th>KL tổng</th>
-                                        <th>Lãi (%)</th>
-                                        <th>Lãi ($)</th>
+                                        <th>Symbol</th>
+                                        <th>Avg Cost</th>
+                                        <th>Quantity</th>
+                                        <th>Profit (%)</th>
+                                        <th>Profit ($)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -209,14 +209,14 @@
             <!-- Cash Movement History -->
             <section class="accounts-table summary-cards">
                 <div class="card">
-                    <h2>Biến động số dư</h2>
+                    <h2>Transaction History</h2>
                     <table>
                         <thead>
                             <tr>
-                                <th>Ngày giờ</th>
-                                <th>Hành động</th>
-                                <th>Số tiền</th>
-                                <th>Số dư mới</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                                <th>Amount</th>
+                                <th>New Balance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -246,14 +246,14 @@
             <!-- Asset Movement History -->
             <section class="accounts-table summary-cards">
                 <div class="card">
-                    <h2>Danh sách biến động tài sản</h2>
+                    <h2>Asset Changes</h2>
                     <table>
                         <thead>
                             <tr>
-                                <th>Ngày giờ</th>
-                                <th>Hành động</th>
-                                <th>Mã cổ phiếu</th>
-                                <th>Thay đổi cổ phiếu</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                                <th>Stock ID</th>
+                                <th>Quantity change</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -275,7 +275,7 @@
             <!-- Balance Over Time Chart -->
             <!-- Balance Over Time Chart -->
             <section class="chart-section" style="margin:2rem 1rem;">
-                <h2 style="text-align: center; margin-bottom: 20px;">Số dư tiền mặt theo thời gian</h2>
+                <h2 style="text-align: center; margin-bottom: 20px;">Cash Balance Over Time</h2>
                 <div style="height: 400px; width: 100%; position: relative;">
                     <canvas id="assetLineChart"></canvas>
                 </div>
@@ -308,7 +308,7 @@
                 labels: timeLabels,
                 datasets: [
                     {
-                        label: 'Số dư tiền mặt',
+                        label: 'Cash Balance',
                         data: cashData,
                         fill: {
                             target: 'origin',
@@ -329,11 +329,11 @@
                 maintainAspectRatio: false,
                 scales: {
                     x: { 
-                        title: { display: true, text: 'Thời gian' },
+                        title: { display: true, text: 'Time' },
                         grid: { display: true, color: 'rgba(0,0,0,0.05)' }
                     },
                     y: { 
-                        title: { display: true, text: 'Giá trị ($)' },
+                        title: { display: true, text: 'Value ($)' },
                         grid: { display: true, color: 'rgba(0,0,0,0.05)' },
                         ticks: {
                             callback: function(value) {

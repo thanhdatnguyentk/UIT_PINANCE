@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lệnh đang chờ khớp</title>
+  <title>Pending Orders</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <div id="globalModal" class="modal">
@@ -34,7 +34,7 @@
         <div class="topbar-search">
           <!-- Unified search: tìm theo ticker hoặc tên công ty -->
           <form action="{{ url_for('company_search') }}" method="get" class="search-form">
-            <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." required />
+            <input type="text" name="query" class="search-input" placeholder="Enter ticker or company name..." required />
             <button type="submit" class="search-button">🔍</button>
           </form>
         </div>
@@ -53,42 +53,42 @@
                   <p class="email">{{ user_email }}</p>
                 </div>
               </div>
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
       </header>
       <section class="filter-section " style="padding:1rem; background:#fff; border-radius:4px; margin-bottom:1rem;">
         <form method="get" action="{{ url_for('pending_orders') }}">
-          <label for="status">Trạng thái:</label>
+          <label for="status">Status:</label>
           <select name="status" id="status" onchange="this.form.submit()">
-            <option value="All" {% if status_filter=='All' %}selected{% endif %}>Tất cả</option>
-            <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>Đang chờ</option>
-            <option value="Completed" {% if status_filter=='Completed' %}selected{% endif %}>Hoàn thành</option>
-            <option value="Cancelled" {% if status_filter=='Cancelled' %}selected{% endif %}>Đã hủy</option>
+            <option value="All" {% if status_filter=='All' %}selected{% endif %}>All</option>
+            <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>Pending</option>
+            <option value="Completed" {% if status_filter=='Completed' %}selected{% endif %}>Completed</option>
+            <option value="Cancelled" {% if status_filter=='Cancelled' %}selected{% endif %}>Cancelled</option>
           </select>
-          <noscript><button type="submit">Lọc</button></noscript>
+          <noscript><button type="submit">Filter</button></noscript>
         </form>
       </section>
       <section class="accounts-table">
-        <h2>Sổ lệnh</h2>
+        <h2>Order Book</h2>
         <table>
           <thead>
             <tr>
-              <th>Mã lệnh</th>
-              <th>Cổ phiếu</th>
-              <th>Loại</th>
-              <th>Số lượng</th>
-              <th>Còn lại</th> <!-- Cột mới thêm vào -->
-              <th>Giá</th>
-              <th>Thời gian đặt</th>
-              <th>Trạng thái</th>
-              <th>Hành động</th>
+              <th>Order ID</th>
+              <th>Stock</th>
+              <th>Type</th>
+              <th>Quantity</th>
+              <th>Remaining</th>
+              <th>Price</th>
+              <th>Order Time</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -98,7 +98,7 @@
               <td>{{ o.ticker_symbol }}</td>
               <td>{{ o.order_type }}</td>
               <td>{{ o.quantity }}</td>
-              <td>{{ o.quantity_remaining }}</td> <!-- Đã sửa từ remaining_quantity thành quantity_remaining -->
+              <td>{{ o.quantity_remaining }}</td>
               <td>{{ "{:,.2f}".format(o.price) }}$</td>
               <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
               <td>{{ o.status }}</td>
@@ -106,8 +106,8 @@
                 {% if o.status == 'Pending' %}
                 <form action="{{ url_for('cancel_order', order_id=o.order_id) }}" method="post" style="display:inline;">
                   <button type="submit" class="btn btn-danger btn-sm"
-                    onclick="return confirm('Bạn chắc chắn muốn hủy lệnh #{{ o.order_id }}?');">
-                    Hủy
+                    onclick="return confirm('Are you sure you want to cancel order #{{ o.order_id }}?');">
+                    Cancel
                   </button>
                 </form>
                 {% else %}

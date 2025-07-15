@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rút tiền</title>
+  <title>Withdraw</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <div id="globalModal" class="modal">
@@ -30,11 +30,11 @@
 
     <div class="main-content">
       <header class="topbar">
-        <div class="breadcrumbs">Rút tiền</div>
+        <div class="breadcrumbs">Withdraw</div>
         <div class="topbar-search">
-          <!-- Unified search: tìm theo ticker hoặc tên công ty -->
+          <!-- Unified search: find by ticker or company name -->
           <form action="{{ url_for('company_search') }}" method="get" class="search-form">
-            <input type="text" name="query" class="search-input" placeholder="Nhập mã hoặc tên công ty..." required />
+            <input type="text" name="query" class="search-input" placeholder="Enter ticker or company name..." required />
             <button type="submit" class="search-button">🔍</button>
           </form>
         </div>
@@ -54,12 +54,12 @@
                 </div>
               </div>
 
-              <a href="{{ url_for('edit_profile') }}">Chỉnh sửa hồ sơ</a>
-              <a href="{{ url_for('asset_distribution') }}">Phân bổ tài sản</a>
-              <a href="{{ url_for('transactions') }}">Lịch sử giao dịch</a>
-              <a href="{{ url_for('deposit') }}">Nạp tiền</a>
-              <a href="{{ url_for('withdraw') }}">Rút tiền</a>
-              <a href="{{ url_for('logout') }}">Đăng xuất</a>
+              <a href="{{ url_for('edit_profile') }}">Edit Profile</a>
+              <a href="{{ url_for('asset_distribution') }}">Asset Distribution</a>
+              <a href="{{ url_for('transactions') }}">Transaction History</a>
+              <a href="{{ url_for('deposit') }}">Deposit</a>
+              <a href="{{ url_for('withdraw') }}">Withdraw</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
         </ul>
         {% endif %} {% endwith %}
         <form method="POST" class="form-container">
-          <label for="account_id">Chọn tài khoản:</label>
+          <label for="account_id">Select Account:</label>
           <select name="account_id" id="account_id" required>
             {% for acc in accounts %}
             <option value="{{ acc.account_id }}">
@@ -83,9 +83,9 @@
             </option>
             {% endfor %}
           </select>
-          <label for="amount">Số tiền rút:</label>
+          <label for="amount">Withdrawal Amount:</label>
           <input type="number" name="amount" id="amount" step="0.01" required />
-          <button type="submit" class="btn btn-primary">Rút tiền</button>
+          <button type="submit" class="btn btn-primary">Withdraw</button>
         </form>
       </section>
     </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng nhập</title>
+  <title>Login</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body>
@@ -22,8 +22,8 @@
   <main class="landing">
     <div class="container landing-content" style="align-items: flex-start;">
       <div class="text-block">
-        <h1>Đăng nhập</h1>
-        <p>Nhập email và mật khẩu của bạn để tiếp tục.</p>
+        <h1>Login</h1>
+        <p>Enter your email and password to continue</p>
       </div>
       <div class="form-block" style="flex:1; max-width:300px;">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -40,7 +40,7 @@
           <input type="email" name="email" required />
           <label>Password:</label>
           <input type="password" name="password" required minlength="6" />
-          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Đăng nhập</button>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Sign in</button>
         </form>
       </div>
     </div>
